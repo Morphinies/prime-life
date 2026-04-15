@@ -1,0 +1,29 @@
+{
+	"name": "prime-life",
+	"version": "1.0.0",
+	"description": "Life tracker for prime life",
+	"main": "index.js",
+	"directories": {
+		"docs": "./docs",
+		"shared": "./shared",
+		"backend": "./backend",
+		"frontend": "./frontend"
+	},
+	"scripts": {
+		"frontend:dev": "cd frontend && npm run dev",
+		"backend:dev": "cd backend && npm run dev",
+		"dev": "concurrently \"npm run frontend:dev\" \"npm run backend:dev\"",
+		"deploy": "concurrently \"cd frontend && npm run deploy\" \"cd backend && npm run deploy\"",
+		"lint": "concurrently \"cd frontend && npm run lint\" \"cd backend && npm run lint\"",
+		"lint:fix": "concurrently \"cd frontend && npm run lint:fix\" \"cd backend && npm run lint:fix\"",
+		"format": "concurrently \"cd frontend && npm run format\" \"cd backend && npm run format\"",
+		"format:check": "concurrently \"cd frontend && npm run format:check\" \"cd backend && npm run format:check\""
+	},
+	"keywords": [],
+	"author": "morphinies",
+	"license": "ISC",
+	"type": "module",
+	"devDependencies": {
+		"concurrently": "^9.2.1"
+	}
+}

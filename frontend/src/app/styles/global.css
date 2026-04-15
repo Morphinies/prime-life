@@ -1,0 +1,37 @@
+@import 'reset-css';
+
+html,
+body,
+#root {
+  min-height: 100dvh;
+}
+
+html {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+html:has(._preloader) {
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.sidebar-corner {
+  top: 0;
+  left: 100%;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  background: var(--ant-layout-light-trigger-bg);
+  mask: radial-gradient(
+    circle at 100% 100%,
+    transparent 16px,
+    var(--ant-layout-light-trigger-bg) 16px
+  );
+}
+
+.container {
+  margin: 0 auto;
+  max-width: 900px;
+}

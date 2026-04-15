@@ -1,0 +1,1 @@
+import{w as t,o as e}from"./chunk-UVKPFVEO-CSnOG_NG.js";function r({}){return[{title:"Home"},{name:"description",content:"Welcome to React Router!"}]}const m=t(function(){return e.jsx(e.Fragment,{children:"Home Page"})});export{m as default,r as meta};

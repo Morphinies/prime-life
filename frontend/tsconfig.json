@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    // --- Базовые настройки ---
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+
+    // "types": ["vite/client"],
+    // "typeRoots": ["./node_modules/@types", "./src/shared/types/*.d.ts"],
+
+    // --- Настройки для путей и типов ---
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    // --- Важные настройки для работы React Router Framework Mode ---
+    // Эта папка создается автоматически плагином reactRouter(), в ней лежат сгенерированные типы
+    "rootDirs": [".", "./.react-router/types"],
+
+    // --- Строгие правила ---
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*", "src/**/*.d.ts", ".react-router/types/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
