@@ -5,11 +5,10 @@ import { useSortable } from '@dnd-kit/sortable';
 import { COLORS, type Color } from '@/app/constants';
 import ActionMenu from '@/pages/tasks/ui/ActionMenu';
 import type { CheckboxProps } from 'antd/lib/checkbox';
+import type { Task, TaskPriority } from '@/entities/task';
 import { Checkbox, Divider, Flex, Tag, Typography } from 'antd';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 const { Title, Text } = Typography;
-
-type PriorityKey = 'high' | 'medium' | 'low';
 
 export type TaskProps = CheckboxProps &
   Task & {
@@ -20,29 +19,15 @@ export type TaskProps = CheckboxProps &
     handleCompleted: () => void;
   };
 
-export type Task = {
-  id: string;
-  title?: string;
-  section?: string;
-  project?: string;
-  deadline?: string;
-  description?: string;
-  priority?: PriorityKey;
-  isCompleted?: boolean;
-  isArchived?: boolean;
-  sortOrder: number;
-  withBottomDivider?: boolean;
-};
-
 export type TaskEdit = Partial<Task>;
 
-const PRIORITY_MAP: Record<PriorityKey, { content: string; color: Color }> = {
+const PRIORITY_MAP: Record<TaskPriority, { content: string; color: Color }> = {
   high: { color: 'red', content: 'Высокий приоритет' },
   medium: { color: 'yellow', content: 'Средний приоритет' },
   low: { color: 'green', content: 'Низкий приоритет' },
 };
 
-export default function Task({
+export default function TaskCard({
   title,
   project,
   section,

@@ -1,6 +1,6 @@
 import { Flex, Typography } from 'antd';
 import Substrate from '@/widgets/Substrate';
-import Task, { type TaskProps } from '@/shared/ui/Task';
+import Task, { type TaskProps } from '@/shared/ui/TaskCard';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 const { Title } = Typography;
 

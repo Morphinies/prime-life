@@ -1,5 +1,5 @@
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
-import Task, { type TaskProps } from '@/shared/ui/Task';
+import Task, { type TaskProps } from '@/shared/ui/TaskCard';
 import { Card, Divider, Flex, Typography } from 'antd';
 import React from 'react';
 const { Title } = Typography;

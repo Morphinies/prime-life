@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { TaskEdit } from '@/shared/ui/Task';
+import type { TaskEdit } from '@/shared/ui/TaskCard';
 import ModalFooter from '@/shared/ui/ModalFooter';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import { Fieldset, type FieldsetProps } from '@/shared/ui/Fieldset';

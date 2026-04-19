@@ -2,16 +2,16 @@ import { Flex } from 'antd';
 import content from './content';
 import type { Route } from '../+types/home';
 import HeadController from './ui/HeadController';
+import { taskApi } from '@/entities/task/api/task-api';
 import TaskList, { type TaskListProps } from './ui/TaskList';
 
 type LoaderData = {
-  taskList: TaskListProps['list'];
+  taskList: TaskListProps['defaultList'];
 };
 
 export async function loader({}: Promise<LoaderData>) {
-  const taskListResp = await fetch('http://localhost:5000/tasks');
-  const taskList: TaskListProps['list'] = await taskListResp.json();
-  return { taskList };
+  const taskListResp = await taskApi.getList();
+  return { taskList: taskListResp.data };
 }
 
 export default function Tasks({ loaderData }: Route.ComponentProps) {
@@ -21,7 +21,7 @@ export default function Tasks({ loaderData }: Route.ComponentProps) {
   return (
     <Flex vertical gap="large" className="container">
       <HeadController {...headController} />
-      <TaskList {...tasks} list={taskList} />
+      <TaskList {...tasks} defaultList={taskList} />
     </Flex>
   );
 }

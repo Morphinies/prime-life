@@ -11,15 +11,14 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 interface SortContextProps<T> {
   id?: string;
-  items: T[];
+  list: T[];
   children: React.ReactNode;
-  setItems?: React.Dispatch<React.SetStateAction<T[]>>;
-  handleReorder: (items: T[], oldIndex: number, newIndex: number) => void;
+  handleReorder: (list: T[], oldIndex: number, newIndex: number) => void;
 }
 
-export function SortContext<T extends { id: string }>({
+export function SortContext<T extends { id: string; sortOrder: number }>({
   id = 'sort-list',
-  items,
+  list,
   children,
   handleReorder,
 }: SortContextProps<T>) {
@@ -27,11 +26,11 @@ export function SortContext<T extends { id: string }>({
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over?.id);
+      const oldIndex = list.findIndex((item) => item.id === active.id);
+      const newIndex = list.findIndex((item) => item.id === over?.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        handleReorder(items, oldIndex, newIndex);
+        handleReorder(list, oldIndex, newIndex);
       }
     }
   }
@@ -52,7 +51,7 @@ export function SortContext<T extends { id: string }>({
       onDragEnd={handleDragEnd}
       collisionDetection={closestCenter}
     >
-      <SortableContext items={items} strategy={verticalListSortingStrategy}>
+      <SortableContext items={list} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
     </DndContext>

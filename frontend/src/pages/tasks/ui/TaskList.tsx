@@ -1,18 +1,21 @@
 import { Button, Flex } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SortContext } from '@/shared/ui/SortContext';
 import ModalTask, { type ModalTaskProps } from './ModalTask';
 import { getEditedObject } from '@/shared/utils/transformer';
-import Task, { type Task as TaskType, type TaskEdit } from '@/shared/ui/Task';
 import { arrayMove } from '@dnd-kit/sortable';
+import TaskCard from '@/shared/ui/TaskCard';
+import { useTaskList, type Task, type UpdateTaskDto } from '@/entities/task';
 
 export interface TaskListProps {
-  list: TaskType[];
+  defaultList?: Task[];
   modalTask: Pick<ModalTaskProps, 'fields' | 'bottomFields'>;
 }
 
-const TaskList = ({ list, modalTask }: TaskListProps) => {
-  const [defaultTask] = useState<TaskEdit>({
+const TaskList = ({ defaultList = [], modalTask }: TaskListProps) => {
+  const { data: list = [] } = useTaskList({ initialData: defaultList });
+
+  const [defaultTask] = useState<UpdateTaskDto>({
     title: '',
     description: '',
     project: undefined,
@@ -20,11 +23,15 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
     deadline: undefined,
     priority: undefined,
   });
-  const [taskEdit, setTaskEdit] = useState<TaskEdit | null>(null);
+  const [taskEdit, setTaskEdit] = useState<UpdateTaskDto | null>(null);
   const [modalTaskError, setModalTaskError] = useState<string>();
-  const [items, setItems] = useState(list);
+  const [, setList] = useState(defaultList);
 
-  const handleSubmit = async (task: TaskEdit) => {
+  useEffect(() => {
+    setList(defaultList);
+  }, [defaultList]);
+
+  const handleSubmit = async (task: UpdateTaskDto) => {
     if (task.id) return handleArchive(task.id, true);
 
     try {
@@ -47,7 +54,7 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
       if (data.error) {
         throw new Error(data.error[0].message);
       }
-      setItems((prev) =>
+      setList((prev) =>
         task.id ? prev.map((item) => (item.id === data.id ? data : item)) : [data, ...prev]
       );
       setTaskEdit(null);
@@ -57,7 +64,7 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
     }
   };
 
-  const handleDelete = async (taskId: TaskType['id']) => {
+  const handleDelete = async (taskId: Task['id']) => {
     try {
       const res = await fetch(`http://localhost:5000/tasks/${taskId}`, {
         method: 'DELETE',
@@ -66,14 +73,14 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
       if (data.error) {
         throw new Error(data.error[0].message);
       }
-      setItems((prev) => prev.filter((item) => item.id !== taskId));
+      setList((prev) => prev.filter((item) => item.id !== taskId));
     } catch (err) {
       console.error(err);
       setModalTaskError('Ошибка! Не удалось обновить задачу.');
     }
   };
 
-  const handleCompleted = async (taskId: TaskType['id'], val: boolean) => {
+  const handleCompleted = async (taskId: Task['id'], val: boolean) => {
     try {
       const body = JSON.stringify({ isCompleted: val });
       const res = await fetch(`http://localhost:5000/tasks/${taskId}`, {
@@ -87,14 +94,14 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
       if (data.error) {
         throw new Error(data.error[0].message);
       }
-      setItems((prev) => prev.map((item) => (item.id === data.id ? data : item)));
+      setList((prev) => prev.map((item) => (item.id === data.id ? data : item)));
     } catch (err) {
       console.error(err);
       setModalTaskError('Ошибка! Не удалось обновить задачу.');
     }
   };
 
-  const handleArchive = async (taskId: TaskType['id'], val: boolean) => {
+  const handleArchive = async (taskId: Task['id'], val: boolean) => {
     try {
       const body = JSON.stringify({ isArchived: val });
       const res = await fetch(`http://localhost:5000/tasks/${taskId}`, {
@@ -108,17 +115,21 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
       if (data.error) {
         throw new Error(data.error[0].message);
       }
-      setItems((prev) => prev.map((item) => (item.id === data.id ? data : item)));
+      setList((prev) => prev.map((item) => (item.id === data.id ? data : item)));
     } catch (err) {
       console.error(err);
       setModalTaskError('Ошибка! Не удалось обновить задачу.');
     }
   };
 
-  const handleReorder = async (items: TaskType[], oldIndex: number, newIndex: number) => {
+  const handleReorder = async (
+    list: Pick<Task, 'id' | 'sortOrder'>[],
+    oldIndex: number,
+    newIndex: number
+  ) => {
     try {
       if (oldIndex === newIndex) return;
-      const targetItemId = items[oldIndex].id;
+      const targetItemId = list[oldIndex].id;
       if (!targetItemId) throw new Error('targetItemId not found');
 
       const IS_ORDER_DESC = true;
@@ -126,19 +137,19 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
 
       let newSortOrder: number;
       if (newIndex === 0) {
-        newSortOrder = items[0].sortOrder + inc;
-      } else if (newIndex === items.length - 1) {
-        newSortOrder = items[items.length - 1].sortOrder - inc;
+        newSortOrder = list[0].sortOrder + inc;
+      } else if (newIndex === list.length - 1) {
+        newSortOrder = list[list.length - 1].sortOrder - inc;
       } else {
         newSortOrder = Number(
-          ((items[newIndex - 1].sortOrder + items[newIndex].sortOrder) / 2).toFixed(4)
+          ((list[newIndex - 1].sortOrder + list[newIndex].sortOrder) / 2).toFixed(4)
         );
       }
 
-      const reorderedItems = items.map((item) =>
+      const reorderedItems = list.map((item) =>
         item.id === targetItemId ? { ...item, sortOrder: newSortOrder } : item
       );
-      setItems(arrayMove(reorderedItems, oldIndex, newIndex));
+      setList(arrayMove(reorderedItems, oldIndex, newIndex));
 
       const body = JSON.stringify({ sortOrder: newSortOrder });
       const res = await fetch(`http://localhost:5000/tasks/${targetItemId}/move`, {
@@ -162,11 +173,11 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
     setTaskEdit(null);
   };
 
-  const showModal = (task?: TaskType) => {
+  const showModal = (task?: Task) => {
     if (!task) {
       setTaskEdit(defaultTask);
     } else {
-      const taskEdit: TaskEdit = {
+      const taskEdit: UpdateTaskDto = {
         id: task.id,
         title: task.title,
         section: task.section,
@@ -182,11 +193,11 @@ const TaskList = ({ list, modalTask }: TaskListProps) => {
 
   return (
     <Flex vertical gap="large">
-      <SortContext items={items} handleReorder={handleReorder}>
+      <SortContext list={list} handleReorder={handleReorder}>
         <Flex vertical>
-          {items.map((task) => (
+          {list.map((task) => (
             <React.Fragment key={task.id}>
-              <Task
+              <TaskCard
                 {...task}
                 withSort={true}
                 withBottomDivider={true}
