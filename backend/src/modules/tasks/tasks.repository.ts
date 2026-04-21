@@ -1,6 +1,13 @@
 import { toSnakeCase } from '@/shared/utils';
 import pool from '@/core/database/postgres.config';
-import type { ReorderTasksProps, Task, TaskCreate, TaskDB, TaskUpdate } from './tasks.types';
+import type {
+  ReorderTasksProps,
+  Task,
+  TaskCreate,
+  TaskDB,
+  TaskListFilters,
+  TaskUpdate,
+} from './tasks.types';
 
 export class TasksRepository {
   transformTaskToDB({
@@ -39,8 +46,41 @@ export class TasksRepository {
     };
   }
 
-  async findAll(): Promise<Task[]> {
-    const result = await pool.query<TaskDB>('SELECT * FROM tasks ORDER BY sort_order DESC');
+  async findAll(filters: TaskListFilters): Promise<Task[]> {
+    const { period, project } = filters;
+
+    const whereByPeriod: Record<'day' | 'week' | 'month' | 'overdue', string> = {
+      day: "deadline >= date_trunc('day', CURRENT_TIMESTAMP) AND deadline < date_trunc('day', CURRENT_TIMESTAMP) + interval '1 day'",
+      week: "deadline >= date_trunc('week', CURRENT_TIMESTAMP) AND deadline < date_trunc('week', CURRENT_TIMESTAMP) + interval '1 week'",
+      month:
+        "deadline >= date_trunc('month', CURRENT_TIMESTAMP) AND deadline < date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month'",
+      overdue:
+        "deadline IS NOT NULL AND deadline < date_trunc('day', CURRENT_TIMESTAMP) AND is_completed = false",
+    };
+
+    const conditions: string[] = [];
+    const values: unknown[] = [];
+
+    if (period !== 'all') {
+      if (period === 'overdue') {
+        conditions.push(whereByPeriod.overdue);
+      } else {
+        conditions.push(`deadline IS NOT NULL AND ${whereByPeriod[period]}`);
+      }
+    }
+
+    if (project) {
+      values.push(project);
+      conditions.push(`project = $${values.length}`);
+    }
+
+    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const result = await pool.query<TaskDB>(
+      `SELECT * FROM tasks ${whereClause} ORDER BY sort_order DESC`,
+      values
+    );
+
     return result.rows.map((row) => this.transformTaskFromDB(row));
   }
 
@@ -63,7 +103,8 @@ export class TasksRepository {
     const maxOrder = await pool.query<{ max: number }>(
       'SELECT COALESCE(MAX(sort_order), -1) as max FROM tasks'
     );
-    const newSortOrder = maxOrder.rows[0].max + 1;
+    const max = Number(maxOrder.rows[0].max);
+    const newSortOrder = max > 0 ? max + 1 : 1;
 
     const result = await pool.query<TaskDB>(
       `INSERT INTO tasks (title, description, section, project, priority, deadline, sort_order)
@@ -77,10 +118,10 @@ export class TasksRepository {
 
   async update(id: string, task: TaskUpdate): Promise<Task | null> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let index = 1;
 
-    for (let taskKey of Object.keys(task) as [keyof typeof task]) {
+    for (const taskKey of Object.keys(task) as (keyof typeof task)[]) {
       const updateFields: (keyof Partial<Task>)[] = [
         'title',
         'section',
@@ -92,6 +133,7 @@ export class TasksRepository {
         'description',
         'sortOrder',
       ];
+
       if (updateFields.includes(taskKey)) {
         fields.push(`${toSnakeCase(taskKey)} = $${index++}`);
         values.push(task[taskKey]);
@@ -109,7 +151,6 @@ export class TasksRepository {
     return data ? this.transformTaskFromDB(data) : null;
   }
 
-  // Перемещение задачи в новую позицию
   async moveTask(taskId: string, newSortOrder: number): Promise<void> {
     await pool.query<TaskDB>('UPDATE tasks SET sort_order = $1 WHERE id = $2', [
       newSortOrder,
@@ -117,7 +158,7 @@ export class TasksRepository {
     ]);
   }
 
-  async reorderTasks(items: ReorderTasksProps): Promise<void> {
+  async reorderTasks(_items: ReorderTasksProps): Promise<void> {
     console.log('todo');
   }
 

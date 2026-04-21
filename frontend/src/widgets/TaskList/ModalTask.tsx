@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { TaskEdit } from '@/shared/ui/TaskCard';
 import ModalFooter from '@/shared/ui/ModalFooter';
+import type { TaskEdit } from '@/entities/task';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import { Fieldset, type FieldsetProps } from '@/shared/ui/Fieldset';
 import { Alert, Form, Modal, type FormProps, type ModalProps } from 'antd';
@@ -42,10 +42,12 @@ const ModalTask = ({
     }
   }, [form, taskEdit]);
 
+  const submitLabel = taskEdit?.id ? 'Обновить' : 'Добавить';
+
   return (
     <Modal
       okButtonProps={{
-        children: taskEdit?.id ? 'Обновить' : 'Добавить',
+        children: submitLabel,
       }}
       styles={{
         container: { paddingTop: cssVar.sizeXXL },
@@ -57,7 +59,7 @@ const ModalTask = ({
             {
               type: 'primary',
               disabled: !isValid,
-              children: taskEdit?.id ? 'Обновить' : 'Добавить',
+              children: submitLabel,
               onClick: () =>
                 handleSubmit({
                   ...taskEdit,

@@ -1,7 +1,7 @@
 import { Card, Flex, Progress, Tag, Typography, type ProgressProps, type TagProps } from 'antd';
-import Substrate from '@/widgets/Substrate';
+import Substrate from '@/shared/ui/Substrate';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
-import { COLORS, type Color } from '@/app/constants';
+import { COLORS, type Color } from '@/shared/config/colors';
 
 const { Title, Text } = Typography;
 

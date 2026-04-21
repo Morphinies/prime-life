@@ -1,7 +1,7 @@
-import Substrate from '@/widgets/Substrate';
+import Substrate from '@/shared/ui/Substrate';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import { Flex, Progress, Typography, type ProgressProps } from 'antd';
-import { type Color } from '@/app/constants';
+import { type Color } from '@/shared/config/colors';
 
 const { Title, Text } = Typography;
 

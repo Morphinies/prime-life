@@ -9,7 +9,7 @@ class AuthController {
     }
     login = async ({ res }) => {
         const data = await this.authService.login();
-        res.end(data);
+        res.json(data);
     };
 }
 exports.AuthController = AuthController;

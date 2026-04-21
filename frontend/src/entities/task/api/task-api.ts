@@ -1,11 +1,18 @@
-import type { Task } from '../model/types';
+import type { CreateTaskDto, Task, TaskListFilters, UpdateTaskDto } from '../model/types';
 import { apiClient } from '@/shared/api/axios-instance';
+import type { StatusResponse } from '@/shared/api/types';
 import { API_ENDPOINTS } from '@/shared/config/api-endpoints';
 
+type TaskListRequestFilters = Pick<TaskListFilters, 'period' | 'project'>;
+
 export const taskApi = {
-  getList: () => apiClient.get<Task[]>(API_ENDPOINTS.tasks.list),
+  getList: (filters?: TaskListRequestFilters) =>
+    apiClient.get<Task[]>(API_ENDPOINTS.tasks.list, { params: filters }),
   getDetail: (id: Task['id']) => apiClient.get<Task>(API_ENDPOINTS.tasks.detail(id)),
-  create: (data: Task) => apiClient.post<Task>(API_ENDPOINTS.tasks.create, data),
-  delete: (id: Task['id']) => apiClient.delete<Task>(API_ENDPOINTS.tasks.delete(id)),
-  update: (data: Task) => apiClient.put<Task>(API_ENDPOINTS.tasks.update(data.id), data),
+  create: (data: CreateTaskDto) => apiClient.post<Task>(API_ENDPOINTS.tasks.create, data),
+  delete: (id: Task['id']) => apiClient.delete<StatusResponse>(API_ENDPOINTS.tasks.delete(id)),
+  update: (id: Task['id'], data: UpdateTaskDto) =>
+    apiClient.put<Task>(API_ENDPOINTS.tasks.update(id), data),
+  move: (id: Task['id'], data: { sortOrder: number }) =>
+    apiClient.put<StatusResponse>(API_ENDPOINTS.tasks.move(id), data),
 };

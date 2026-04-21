@@ -1,12 +1,22 @@
-// Типы
-export type { Task, CreateTaskDto, UpdateTaskDto, TaskPriority } from './model/types';
+export type {
+  Task,
+  CreateTaskDto,
+  UpdateTaskDto,
+  TaskPriority,
+  TaskEdit,
+  TaskListFilters,
+  TaskListPeriod,
+  TaskListView,
+} from './model/types';
 
-// API хуки
-export { useTaskList, useTask, taskKeys } from './api/task-queries';
+export {
+  useTask,
+  useTaskList,
+  useCreateTask,
+  useDeleteTask,
+  useUpdateTask,
+  useReorderTasks,
+  taskKeys,
+} from './api/task-queries';
 
-// Компоненты
-// export { TaskCard } from './ui/task-card';
-// export { TaskList } from './ui/task-list';
-
-// Утилиты
-// export { getTaskStatusColor, filterTasksByStatus } from './model/utils';
+export { DEFAULT_TASK_LIST_FILTERS, getTaskListFilters, getTaskListTitle } from './model/utils';

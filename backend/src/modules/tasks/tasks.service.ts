@@ -1,5 +1,5 @@
 import { TasksRepository } from './tasks.repository';
-import type { ReorderTasksProps, Task, TaskCreate, TaskUpdate } from './tasks.types';
+import type { ReorderTasksProps, Task, TaskCreate, TaskListFilters, TaskUpdate } from './tasks.types';
 
 export class TasksService {
   private repository: TasksRepository;
@@ -8,8 +8,8 @@ export class TasksService {
     this.repository = new TasksRepository();
   }
 
-  async getAllTasks(): Promise<Task[]> {
-    return this.repository.findAll();
+  async getAllTasks(filters: TaskListFilters): Promise<Task[]> {
+    return this.repository.findAll(filters);
   }
 
   async getTaskById(id: string): Promise<Task | null> {

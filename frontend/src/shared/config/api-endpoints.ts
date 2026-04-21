@@ -1,5 +1,3 @@
-import type { Task } from '../ui/TaskCard';
-
 export const API_ENDPOINTS = {
   auth: {
     login: '/auth/login',
@@ -9,9 +7,10 @@ export const API_ENDPOINTS = {
   },
   tasks: {
     list: '/tasks',
-    detail: (id: Task['id']) => `/tasks/${id}`,
+    detail: (id: string) => `/tasks/${id}`,
     create: '/tasks',
-    update: (id: Task['id']) => `/tasks/${id}`,
-    delete: (id: Task['id']) => `/tasks/${id}`,
+    update: (id: string) => `/tasks/${id}`,
+    delete: (id: string) => `/tasks/${id}`,
+    move: (id: string) => `/tasks/${id}/move`,
   },
 } as const;

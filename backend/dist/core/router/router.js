@@ -6,5 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const router_factory_1 = require("./router-factory");
 const auth_routes_1 = __importDefault(require("../../modules/auth/auth.routes"));
-exports.router = new router_factory_1.Router('/', [auth_routes_1.default]);
+const tasks_routes_1 = __importDefault(require("../../modules/tasks/tasks.routes"));
+exports.router = new router_factory_1.Router('/', [auth_routes_1.default, tasks_routes_1.default]);
 exports.default = exports.router;

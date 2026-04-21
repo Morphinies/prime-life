@@ -1,4 +1,4 @@
-import { COLORS } from '@/app/constants';
+import { COLORS } from '@/shared/config/colors';
 import type { TasksProps } from '@/pages/dashboard/ui/Tasks';
 import type { ProgressProps } from '@/pages/dashboard/ui/Progress';
 import type { StatisticsProps } from '@/pages/dashboard/ui/Statistics';

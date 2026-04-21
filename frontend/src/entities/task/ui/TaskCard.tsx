@@ -1,25 +1,33 @@
 import dayjs from 'dayjs';
-import Icon from '../Icon';
-import { SortableItem } from '../SortableItem';
+import Icon from '@/shared/ui/Icon';
+import { ClientOnly } from '@/shared/ui/ClientOnly';
+import { SortableItem } from '@/shared/ui/SortableItem';
 import { useSortable } from '@dnd-kit/sortable';
-import { COLORS, type Color } from '@/app/constants';
-import ActionMenu from '@/pages/tasks/ui/ActionMenu';
+import { COLORS, type Color } from '@/shared/config/colors';
+import ActionMenu from '@/shared/ui/ActionMenu';
 import type { CheckboxProps } from 'antd/lib/checkbox';
 import type { Task, TaskPriority } from '@/entities/task';
 import { Checkbox, Divider, Flex, Tag, Typography } from 'antd';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
+
 const { Title, Text } = Typography;
 
+type TaskCardData = Pick<Task, 'id'> &
+  Partial<Omit<Task, 'id' | 'sortOrder' | 'withBottomDivider'>> & {
+    sortOrder?: Task['sortOrder'];
+  };
+
 export type TaskProps = CheckboxProps &
-  Task & {
+  TaskCardData & {
     withSort?: boolean;
     handleEdit?: () => void;
     handleDelete?: () => void;
     handleArchive?: () => void;
-    handleCompleted: () => void;
+    handleComplete?: () => void;
+    withBottomDivider?: boolean;
   };
 
-export type TaskEdit = Partial<Task>;
+type TaskCheckboxProps = Pick<CheckboxProps, 'disabled'>;
 
 const PRIORITY_MAP: Record<TaskPriority, { content: string; color: Color }> = {
   high: { color: 'red', content: 'Высокий приоритет' },
@@ -27,41 +35,80 @@ const PRIORITY_MAP: Record<TaskPriority, { content: string; color: Color }> = {
   low: { color: 'green', content: 'Низкий приоритет' },
 };
 
+function TaskCheckboxFallback({
+  checked,
+  disabled,
+}: TaskCheckboxProps & {
+  checked: boolean;
+}) {
+  return (
+    <span
+      style={{
+        width: 16,
+        height: 16,
+        marginTop: '0.3em',
+        display: 'inline-flex',
+        flex: '0 0 auto',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        readOnly
+        aria-hidden
+        tabIndex={-1}
+        style={{ margin: 0 }}
+      />
+    </span>
+  );
+}
+
 export default function TaskCard({
+  id,
   title,
   project,
   section,
   deadline,
   priority,
+  sortOrder,
   description,
   withSort = false,
+  isArchived = false,
   isCompleted = false,
   withBottomDivider = false,
   handleEdit,
   handleDelete,
   handleArchive,
-  handleCompleted,
+  handleComplete,
   ...rest
 }: TaskProps) {
-  const sortable = withSort ? useSortable({ id: rest.id }) : undefined;
+  const sortable = withSort ? useSortable({ id }) : undefined;
   const { cssVar } = useThemeToken();
+  const checkboxProps: TaskCheckboxProps = {
+    disabled: rest.disabled,
+  };
 
   return (
-    <SortableItem id={rest.id} isOff={!withSort} sortable={sortable}>
+    <SortableItem id={id} isOff={!withSort} sortable={sortable}>
       <Flex gap="small" align="flex-start">
-        <Checkbox
-          checked={isCompleted}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleCompleted();
-          }}
-          styles={{
-            label: { width: '100%', display: 'flex' },
-            icon: { alignSelf: 'flex-start', marginTop: '0.3em' },
-          }}
-          {...rest}
-        ></Checkbox>
+        <ClientOnly fallback={<TaskCheckboxFallback checked={isCompleted} {...checkboxProps} />}>
+          <Checkbox
+            {...rest}
+            checked={isCompleted}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleComplete?.();
+            }}
+            onClick={(e) => e.stopPropagation()}
+            styles={{
+              label: { width: '100%', display: 'flex' },
+              icon: { alignSelf: 'flex-start', marginTop: '0.3em' },
+            }}
+          ></Checkbox>
+        </ClientOnly>
         <Flex
           flex={1}
           align="flex-start"

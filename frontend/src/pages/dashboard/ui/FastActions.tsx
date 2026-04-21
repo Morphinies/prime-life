@@ -1,5 +1,5 @@
 import { Button, Flex, Typography, type ButtonProps } from 'antd';
-import Substrate from '@/widgets/Substrate';
+import Substrate from '@/shared/ui/Substrate';
 
 const { Title } = Typography;
 

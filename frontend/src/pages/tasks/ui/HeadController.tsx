@@ -1,50 +1,92 @@
-import { useState } from 'react';
-import { Button, Flex, Typography } from 'antd';
-import type { ButtonProps } from 'antd/lib/button';
+import { Button, Flex, Select, Typography } from 'antd';
+import type { TaskListFilters, TaskListPeriod, TaskListView } from '@/entities/task';
 import Icon, { type IconName } from '@/shared/ui/Icon';
+
 const { Title } = Typography;
 
-export interface HeadControllerProps {
+type FilterOption = {
+  label: string;
+  value: string;
+  iconName?: IconName;
+};
+
+export interface HeadControllerConfigProps {
   title: string;
-  periodFilters: (ButtonProps & { iconName?: IconName })[];
-  viewSettings: (ButtonProps & { iconName?: IconName })[];
+  periodFilters: FilterOption[];
+  projectFilters: FilterOption[];
+  viewSettings: FilterOption[];
 }
 
-const HeadController = ({ periodFilters, viewSettings, title }: HeadControllerProps) => {
-  const [filters, setFilters] = useState({ periodId: periodFilters[0].id });
-  const [settings, setSettings] = useState({ viewId: viewSettings[0].id });
+export interface HeadControllerProps extends HeadControllerConfigProps {
+  filters: TaskListFilters;
+  onFiltersChange: (filters: TaskListFilters) => void;
+}
 
+const HeadController = ({
+  filters,
+  title,
+  periodFilters,
+  projectFilters,
+  viewSettings,
+  onFiltersChange,
+}: HeadControllerProps) => {
   return (
     <Flex vertical gap="large">
-      <Flex justify="space-between">
-        <Flex gap="small">
-          {periodFilters.map(({ children, id, iconName, ...rest }) => (
+      <Flex justify="space-between" gap="middle" wrap>
+        <Flex gap="small" wrap>
+          {periodFilters.map(({ label, value, iconName }) => (
             <Button
-              key={id}
+              key={value}
               variant="filled"
-              children={children}
+              color={filters.period === (value as TaskListPeriod) ? 'blue' : 'default'}
               icon={iconName ? <Icon name={iconName} /> : undefined}
-              color={filters.periodId === id ? 'blue' : 'default'}
-              onClick={() => setFilters((p) => ({ ...p, periodId: id }))}
-              {...rest}
-            />
+              onClick={() => onFiltersChange({ ...filters, period: value as TaskListPeriod })}
+            >
+              {label}
+            </Button>
           ))}
         </Flex>
-        <Flex gap="small">
-          {viewSettings.map(({ children, id, iconName, ...rest }) => (
-            <Button
-              key={id}
-              variant="link"
-              children={children}
-              icon={iconName ? <Icon name={iconName} /> : undefined}
-              color={settings.viewId === id ? 'blue' : 'default'}
-              onClick={() => setSettings((p) => ({ ...p, viewId: id }))}
-              {...rest}
-            />
-          ))}
+
+        <Flex gap="small" wrap>
+          <Select
+            allowClear
+            value={filters.project}
+            placeholder="Проект"
+            style={{ minWidth: 180 }}
+            options={projectFilters.map(({ label, value }) => ({
+              label,
+              value,
+            }))}
+            onChange={(project) => onFiltersChange({ ...filters, project })}
+          />
+
+          <Select
+            value={filters.view}
+            style={{ width: 56 }}
+            placement="bottomRight"
+            popupMatchSelectWidth={false}
+            optionLabelProp="label"
+            onChange={(view) => onFiltersChange({ ...filters, view: view as TaskListView })}
+          >
+            {viewSettings.map(({ label, value, iconName }) => (
+              <Select.Option
+                key={value}
+                value={value}
+                label={iconName ? <Icon name={iconName} /> : label}
+              >
+                <Flex gap="small" align="center">
+                  {iconName ? <Icon name={iconName} /> : null}
+                  <span>{label}</span>
+                </Flex>
+              </Select.Option>
+            ))}
+          </Select>
         </Flex>
       </Flex>
-      <Title type="secondary" children={title} level={5} />
+
+      <Title type="secondary" level={5}>
+        {title}
+      </Title>
     </Flex>
   );
 };

@@ -1,11 +1,10 @@
-import { Checkbox, Flex, Tag, Typography } from 'antd';
-import Substrate from '@/widgets/Substrate';
+import { Checkbox, Flex, Typography } from 'antd';
+import Substrate from '@/shared/ui/Substrate';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
-import { COLORS } from '@/app/constants';
 import type { IconName } from '@/shared/ui/Icon';
 import Icon from '@/shared/ui/Icon';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 export interface HabitsProps {
   title: string;

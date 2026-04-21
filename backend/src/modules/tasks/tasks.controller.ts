@@ -1,5 +1,6 @@
 import {
   taskCreateSchema,
+  taskListFiltersSchema,
   taskPublicSchema,
   taskUpdateSchema,
   taskPublicArraySchema,
@@ -15,8 +16,9 @@ export class TasksController {
     this.tasksService = new TasksService();
   }
 
-  getAllTasks = async ({ res }: RouteHandlerProps) => {
-    const tasks = await this.tasksService.getAllTasks();
+  getAllTasks = async ({ res, query }: RouteHandlerProps) => {
+    const filters = taskListFiltersSchema.parse(query || {});
+    const tasks = await this.tasksService.getAllTasks(filters);
     const publicTasks = taskPublicArraySchema.parse(tasks);
     res.json(publicTasks);
   };

@@ -3,6 +3,7 @@ import {
   reorderTasksSchema,
   taskCreateSchema,
   taskDBSchema,
+  taskListFiltersSchema,
   taskSchema,
   taskUpdateSchema,
 } from './tasks.schemas';
@@ -10,7 +11,6 @@ import {
 export type Task = z.infer<typeof taskSchema>;
 export type TaskCreate = z.infer<typeof taskCreateSchema>;
 export type TaskUpdate = z.infer<typeof taskUpdateSchema>;
-
 export type TaskDB = z.infer<typeof taskDBSchema>;
-
 export type ReorderTasksProps = z.infer<typeof reorderTasksSchema>;
+export type TaskListFilters = z.infer<typeof taskListFiltersSchema>;

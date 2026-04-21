@@ -45,7 +45,7 @@ import content from '@/pages/dashboard/content';
 //   );
 // }
 
-export default function Dashboard({ loaderData }: Route.ComponentProps) {
+export default function Dashboard({}: Route.ComponentProps) {
   const { progress, statistics, fastActions, tasks, projects, habits, finance } = content;
 
   return (

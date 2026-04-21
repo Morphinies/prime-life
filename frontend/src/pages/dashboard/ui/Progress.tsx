@@ -1,4 +1,4 @@
-import Substrate from '@/widgets/Substrate';
+import Substrate from '@/shared/ui/Substrate';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import { Flex, Progress as AntdProgress, Typography } from 'antd';
 

@@ -1,6 +1,6 @@
-import Substrate from '@/widgets/Substrate';
+import Substrate from '@/shared/ui/Substrate';
 import { Badge, Flex, Tag, Typography } from 'antd';
-import { COLORS, type Color } from '@/app/constants';
+import { COLORS, type Color } from '@/shared/config/colors';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 
 const { Title, Text } = Typography;

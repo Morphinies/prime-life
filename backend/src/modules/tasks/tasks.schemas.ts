@@ -1,6 +1,13 @@
 import { nullToUndefined } from '@/shared/utils/zod';
 import z from 'zod';
 
+export const taskListPeriodSchema = z.enum(['day', 'week', 'month', 'overdue', 'all']);
+
+export const taskListFiltersSchema = z.object({
+  period: taskListPeriodSchema.optional().default('day'),
+  project: z.string().optional(),
+});
+
 export const taskSchema = z.object({
   id: z.string(),
   title: z.string(),

@@ -5,3 +5,8 @@ export type UseQueryOptions<T, K extends keyof UseQueryOptionsRQ = 'queryKey' | 
   UseQueryOptionsRQ<T, AxiosError>,
   K
 >;
+
+export type StatusResponse = {
+  status: 'success' | 'error';
+  message?: string;
+};

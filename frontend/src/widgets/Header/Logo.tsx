@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { Flex, Typography } from 'antd';
+import { useThemeMode } from '@/features/theme';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import { ReactComponent as LogoDark } from '@/assets/icons/logo-dark.svg';
 import { ReactComponent as LogoLight } from '@/assets/icons/logo-light.svg';
@@ -9,7 +10,8 @@ interface LogoProps {
 }
 
 const Logo = ({ collapsed }: LogoProps) => {
-  const { token, isDark } = useThemeToken();
+  const { token } = useThemeToken();
+  const { isDarkTheme } = useThemeMode();
 
   return (
     <Link to={'/'}>
@@ -23,7 +25,7 @@ const Logo = ({ collapsed }: LogoProps) => {
           transition: `width ${token.motionDurationMid} ${token.motionEaseInOut}`,
         }}
       >
-        {isDark ? (
+        {isDarkTheme ? (
           <LogoLight
             style={{
               width: '2rem',

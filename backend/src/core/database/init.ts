@@ -13,6 +13,7 @@ export async function initDatabase() {
         project VARCHAR(100),
         priority VARCHAR(20) CHECK (priority IN ('low', 'medium', 'high')),
         deadline TIMESTAMP,
+        sort_order DECIMAL(10, 4) DEFAULT 0,
         is_completed BOOLEAN DEFAULT FALSE,
         is_archived BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -1,7 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Router = void 0;
 const index_js_1 = require("../../shared/utils/index.js");
+const bodyParser_js_1 = require("../middleware/bodyParser.js");
+const jsonResponse_js_1 = __importDefault(require("../middleware/jsonResponse.js"));
+const zod_1 = __importDefault(require("zod"));
 class Router {
     routes = [];
     routesByMethod = new Map();
@@ -49,9 +55,9 @@ class Router {
         let weight = 0;
         if (exact)
             weight += 100;
-        if (!hasWildcard)
+        if (hasWildcard)
             weight += 50;
-        if (!hasParam)
+        if (hasParam)
             weight += 20;
         weight += segments;
         return weight;
@@ -155,25 +161,32 @@ class Router {
         }
         return { route: null, params: {} };
     }
-    handleRequest(req, res) {
+    async handleRequest(req, res) {
+        (0, jsonResponse_js_1.default)({ req, res });
         const method = (req.method || 'GET').toUpperCase();
         const url = req.url;
         if (!url) {
-            res.statusCode = 400;
-            res.end('Invalid request URL');
+            res.json('Invalid request URL', 400);
             return;
         }
         const { pathname, query } = (0, index_js_1.parseUrl)(url, req);
         if (!pathname) {
-            res.statusCode = 400;
-            res.end('Invalid request path');
+            res.json('Invalid request path', 400);
             return;
         }
         const { route, params } = this.findRouteMatch(method, pathname);
         if (!route) {
-            res.statusCode = 404;
-            res.end('Page is not found');
+            res.json('Page is not found', 404);
             return;
+        }
+        if (['POST', 'PUT', 'PATCH'].includes(method)) {
+            try {
+                await (await (0, bodyParser_js_1.bodyParser)())({ req, res });
+            }
+            catch (err) {
+                res.json({ error: 'Invalid request body' }, 400);
+                return;
+            }
         }
         const props = { req, res, params, query };
         if (!this.executeMiddlewares(this.beforeMiddlewares, props, res)) {
@@ -183,7 +196,21 @@ class Router {
             !this.executeMiddlewares(route.options.middleware, props, res)) {
             return;
         }
-        route.handler(props);
+        try {
+            await route.handler(props);
+        }
+        catch (err) {
+            if (err instanceof zod_1.default.ZodError) {
+                res.json({ error: JSON.parse(err.message || '{}') }, 400);
+            }
+            else if (err instanceof Error) {
+                const errorMessage = err?.message;
+                res.json({ error: errorMessage ?? 'Internal server error' }, 500);
+            }
+            else {
+                res.json({ error: 'Internal server error' }, 500);
+            }
+        }
         if (res.writableEnded) {
             return;
         }

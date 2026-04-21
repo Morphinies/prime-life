@@ -2,19 +2,14 @@
 
 import Logo from './Logo';
 import Icon from '@/shared/ui/Icon';
-import { toggleTheme } from '@/app/store/theme/theme.slice';
+import { ThemeToggleButton } from '@/features/theme';
 import { Badge, Button, Flex, Layout, Input, theme } from 'antd';
-import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { selectIsDarkTheme } from '@/app/store/theme/theme.selectors';
 
 interface HeaderProps {
   collapsed: boolean;
 }
 
 const Header = ({ collapsed }: HeaderProps) => {
-  const dispatch = useAppDispatch();
-  const isDarkTheme = useAppSelector(selectIsDarkTheme);
-
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -43,18 +38,7 @@ const Header = ({ collapsed }: HeaderProps) => {
             />
           </Badge>
 
-          <Button
-            onClick={() => dispatch(toggleTheme())}
-            icon={
-              <Icon
-                name={isDarkTheme ? 'SunOutlined' : 'MoonOutlined'}
-                style={{
-                  fontSize: 18,
-                }}
-              />
-            }
-            type="text"
-          />
+          <ThemeToggleButton />
         </Flex>
       </Flex>
     </Layout.Header>

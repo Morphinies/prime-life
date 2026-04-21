@@ -1,5 +1,6 @@
+import { useThemeMode } from '@/features/theme';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
-import Task, { type TaskProps } from '@/shared/ui/TaskCard';
+import Task, { type TaskProps } from '@/entities/task/ui/TaskCard';
 import { Card, Divider, Flex, Typography } from 'antd';
 import React from 'react';
 const { Title } = Typography;
@@ -9,7 +10,8 @@ export interface TasksSectionsProps {
 }
 
 const TasksSections = ({ sections }: TasksSectionsProps) => {
-  const { cssVar, isDark } = useThemeToken();
+  const { cssVar } = useThemeToken();
+  const { isDarkTheme } = useThemeMode();
 
   return (
     <Flex vertical gap="medium">
@@ -23,7 +25,7 @@ const TasksSections = ({ sections }: TasksSectionsProps) => {
               border: 'none',
             },
             body: {
-              background: isDark ? undefined : cssVar.colorBgContainer,
+              background: isDarkTheme ? undefined : cssVar.colorBgContainer,
             },
           }}
           extra={'+ todo'}
