@@ -45,6 +45,7 @@ const TasksSections = ({
     showModal,
     hideModal,
     showTaskModal,
+    showCreateTaskModal,
     hideTaskModal,
     showAddTasksModal,
     hideAddTasksModal,
@@ -101,6 +102,7 @@ const TasksSections = ({
               }}
               extra={
                 <ActionMenu
+                  archiveLabel={project.isArchived ? 'Разархивировать' : 'Архивировать'}
                   onEdit={() => showModal(project)}
                   onArchive={() => handleArchive(project.id, !project.isArchived)}
                   onDelete={() => confirmDelete(project.id)}
@@ -158,12 +160,16 @@ const TasksSections = ({
                   <Empty
                     description="В проекте пока нет задач"
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  >
-                    <Button type="link" onClick={() => showAddTasksModal(project)}>
-                      + Добавить задачи
-                    </Button>
-                  </Empty>
+                  />
                 )}
+
+                <Button
+                  type="link"
+                  onClick={() => showAddTasksModal(project)}
+                  styles={{ root: { width: 'fit-content', padding: 0 } }}
+                >
+                  + Добавить задачи
+                </Button>
               </Flex>
             </Card>
           ))}
@@ -227,6 +233,14 @@ const TasksSections = ({
           )}
 
           {addTaskToProjectError && <Text type="danger">{addTaskToProjectError}</Text>}
+
+          <Button
+            type="link"
+            onClick={showCreateTaskModal}
+            styles={{ root: { width: 'fit-content', padding: 0 } }}
+          >
+            + Создать новую задачу
+          </Button>
         </Flex>
       </Modal>
     </Flex>

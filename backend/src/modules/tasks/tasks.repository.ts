@@ -101,6 +101,18 @@ export class TasksRepository {
     return data ? this.transformTaskFromDB(data) : null;
   }
 
+  private async ensureProjectExists(project?: string | null): Promise<void> {
+    const title = project?.trim();
+    if (!title) return;
+
+    await pool.query(
+      `INSERT INTO projects (title)
+       VALUES ($1)
+       ON CONFLICT (title) DO NOTHING`,
+      [title]
+    );
+  }
+
   async checkIsExist(id: string): Promise<boolean> {
     const result = await pool.query<{ exists: boolean }>(
       'SELECT EXISTS(SELECT 1 FROM tasks WHERE id = $1) as exists',
@@ -111,6 +123,8 @@ export class TasksRepository {
 
   async create(task: TaskCreate): Promise<Task> {
     const { title, description, section, project, priority, deadline } = task;
+    await this.ensureProjectExists(project);
+
     const maxOrder = await pool.query<{ max: number }>(
       'SELECT COALESCE(MAX(sort_order), -1) as max FROM tasks'
     );
@@ -128,6 +142,8 @@ export class TasksRepository {
   }
 
   async update(id: string, task: TaskUpdate): Promise<Task | null> {
+    await this.ensureProjectExists(task.project);
+
     const fields: string[] = [];
     const values: unknown[] = [];
     let index = 1;

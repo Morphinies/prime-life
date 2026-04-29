@@ -40,7 +40,10 @@ const ModalTask = ({
 
   useEffect(() => {
     if (taskEdit) {
-      form.setFieldsValue(taskEdit);
+      form.setFieldsValue({
+        ...taskEdit,
+        project: taskEdit.project ? [taskEdit.project] : undefined,
+      });
     }
   }, [form, taskEdit]);
 
@@ -66,7 +69,12 @@ const ModalTask = ({
               onClick: () =>
                 handleSubmit({
                   ...taskEdit,
-                  ...form.getFieldsValue(),
+                  ...Object.fromEntries(
+                    Object.entries(form.getFieldsValue()).map(([key, value]) => [
+                      key,
+                      Array.isArray(value) ? value[0] : value,
+                    ])
+                  ),
                 }),
             },
           ]}

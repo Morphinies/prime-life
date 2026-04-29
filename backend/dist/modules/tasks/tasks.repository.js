@@ -68,12 +68,21 @@ class TasksRepository {
         const data = result.rows[0];
         return data ? this.transformTaskFromDB(data) : null;
     }
+    async ensureProjectExists(project) {
+        const title = project?.trim();
+        if (!title)
+            return;
+        await postgres_config_1.default.query(`INSERT INTO projects (title)
+       VALUES ($1)
+       ON CONFLICT (title) DO NOTHING`, [title]);
+    }
     async checkIsExist(id) {
         const result = await postgres_config_1.default.query('SELECT EXISTS(SELECT 1 FROM tasks WHERE id = $1) as exists', [id]);
         return result.rows[0].exists;
     }
     async create(task) {
         const { title, description, section, project, priority, deadline } = task;
+        await this.ensureProjectExists(project);
         const maxOrder = await postgres_config_1.default.query('SELECT COALESCE(MAX(sort_order), -1) as max FROM tasks');
         const max = Number(maxOrder.rows[0].max);
         const newSortOrder = max > 0 ? max + 1 : 1;
@@ -84,6 +93,7 @@ class TasksRepository {
         return this.transformTaskFromDB(data);
     }
     async update(id, task) {
+        await this.ensureProjectExists(task.project);
         const fields = [];
         const values = [];
         let index = 1;

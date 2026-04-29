@@ -15,6 +15,7 @@ export interface FieldProps extends FormItemProps {
   name: string;
   placeholder?: string;
   options?: SelectProps['options'];
+  creatable?: boolean;
   type?: 'input' | 'textarea' | 'select' | 'date';
 }
 
@@ -25,7 +26,7 @@ export interface FieldsetProps extends Pick<FlexProps, 'vertical'> {
 export function Fieldset({ fields, vertical = true }: FieldsetProps) {
   return (
     <Flex vertical={vertical} gap={vertical ? undefined : 'medium'}>
-      {fields.map(({ name, label, type = 'input', placeholder, options, ...rest }) => {
+      {fields.map(({ name, label, type = 'input', placeholder, options, creatable, ...rest }) => {
         const inputProps = { placeholder };
 
         const getValueProps = (value: any) => {
@@ -48,7 +49,17 @@ export function Fieldset({ fields, vertical = true }: FieldsetProps) {
             {type === 'textarea' && (
               <TextArea rows={12} styles={{ textarea: { resize: 'none' } }} {...inputProps} />
             )}
-            {type === 'select' && <Select options={options} allowClear {...inputProps} />}
+            {type === 'select' && (
+              <Select
+                options={options}
+                allowClear
+                showSearch={creatable}
+                optionFilterProp="label"
+                mode={creatable ? 'tags' : undefined}
+                maxCount={creatable ? 1 : undefined}
+                {...inputProps}
+              />
+            )}
             {type === 'date' && <DatePicker style={{ width: '100%' }} {...inputProps} />}
           </Form.Item>
         );

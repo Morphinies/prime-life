@@ -14,7 +14,9 @@ import {
 import {
   useDeleteTask,
   useTaskList,
+  useCreateTask,
   useUpdateTask,
+  type CreateTaskDto,
   type Task,
   type TaskEdit,
 } from '@/entities/task';
@@ -68,11 +70,13 @@ export function useProjectsPageController({
   const deleteProject = useDeleteProject();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const createTask = useCreateTask();
 
   const modalProjectError =
     updateProject.error?.message || createProject.error?.message || deleteProject.error?.message;
   const addTaskToProjectError = updateTask.error?.message;
-  const modalTaskError = updateTask.error?.message || deleteTask.error?.message;
+  const modalTaskError =
+    updateTask.error?.message || deleteTask.error?.message || createTask.error?.message;
 
   const queryFilters = { project: filters.project, status: filters.status };
   const { data: projects = defaultProjects } = useProjectList(queryFilters, {
@@ -177,6 +181,19 @@ export function useProjectsPageController({
     });
   };
 
+  const showCreateTaskModal = () => {
+    if (!projectForTaskAdding) return;
+
+    setTaskEdit({
+      title: '',
+      description: '',
+      project: projectForTaskAdding.title,
+      isCompleted: false,
+      deadline: undefined,
+      priority: undefined,
+    });
+  };
+
   const hideTaskModal = () => {
     setTaskEdit(null);
   };
@@ -204,12 +221,13 @@ export function useProjectsPageController({
   };
 
   const handleTaskSubmit = async (task: TaskEdit) => {
-    if (!taskEdit?.id) return;
-
-    const updatedTask = await updateTask.mutateAsync({
-      id: taskEdit.id,
-      data: getEditedObject(taskEdit, task),
-    });
+    const isEditing = !!taskEdit?.id;
+    const updatedTask = isEditing
+      ? await updateTask.mutateAsync({
+          id: taskEdit.id!,
+          data: getEditedObject(taskEdit, task),
+        })
+      : await createTask.mutateAsync(task as CreateTaskDto);
 
     setLocallyAddedTasks((currentTasks) => [
       ...currentTasks.filter((task) => task.id !== updatedTask.id),
@@ -280,6 +298,7 @@ export function useProjectsPageController({
     showModal,
     hideModal,
     showTaskModal,
+    showCreateTaskModal,
     hideTaskModal,
     showAddTasksModal,
     hideAddTasksModal,

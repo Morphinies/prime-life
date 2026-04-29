@@ -38,6 +38,7 @@ const content: {
               type: 'select',
               name: 'project',
               placeholder: 'Проект',
+              creatable: true,
               options: [],
             },
           ],
