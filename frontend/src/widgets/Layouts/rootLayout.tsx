@@ -15,13 +15,18 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <Layout style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Header collapsed={collapsed} />
-      <Flex flex={1}>
+      <Flex flex={1} style={{ minHeight: 0 }}>
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <Layout>
+        <Layout style={{ minWidth: 0, minHeight: 0 }}>
           <Layout.Content
+            className="main-scroll"
             style={{
               minHeight: 280,
               margin: token.marginMD,
+              marginRight: 0,
+              paddingRight: token.marginMD,
+              overflowX: 'hidden',
+              overflowY: 'auto',
             }}
           >
             {children}
