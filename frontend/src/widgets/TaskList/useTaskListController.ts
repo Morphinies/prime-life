@@ -15,12 +15,40 @@ import {
 
 type UseTaskListControllerParams = Pick<TaskListProps, 'defaultList' | 'filters'>;
 
-export function useTaskListController({
-  filters,
-  defaultList = [],
-}: UseTaskListControllerParams) {
+const ACTIVE_LIST_REMOVAL_DELAY = 600;
+
+function wait(ms: number) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+function isActiveTaskList(filters: TaskListProps['filters']) {
+  return filters.period !== 'completed' && filters.period !== 'archived';
+}
+
+function shouldKeepTaskInCurrentList(task: Task, filters: TaskListProps['filters']) {
+  if (filters.period === 'completed') {
+    return !!task.isCompleted && !task.isArchived;
+  }
+
+  if (filters.period === 'archived') {
+    return !!task.isArchived;
+  }
+
+  return !task.isCompleted && !task.isArchived;
+}
+
+async function delayActiveListRemoval(task: Task, filters: TaskListProps['filters']) {
+  if (!isActiveTaskList(filters) || shouldKeepTaskInCurrentList(task, filters)) return;
+
+  await wait(ACTIVE_LIST_REMOVAL_DELAY);
+}
+
+export function useTaskListController({ filters, defaultList = [] }: UseTaskListControllerParams) {
   const [taskEdit, setTaskEdit] = useState<UpdateTaskDto | null>(null);
   const isFirstListSync = useRef(true);
+  const delayedRemovalCount = useRef(0);
 
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -49,6 +77,8 @@ export function useTaskListController({
       isFirstListSync.current = false;
       return;
     }
+
+    if (delayedRemovalCount.current > 0) return;
 
     setListState(list);
   }, [list, filters.period, filters.project]);
@@ -87,17 +117,51 @@ export function useTaskListController({
   };
 
   const handleComplete = async (taskId: Task['id'], isCompleted: boolean) => {
-    await updateTask.mutateAsync({
+    const updatedTask = await updateTask.mutateAsync({
       id: taskId,
       data: { isCompleted },
     });
+
+    setListState((currentList) =>
+      currentList.map((task) => (task.id === taskId ? updatedTask : task))
+    );
+
+    const shouldDelayRemoval =
+      isActiveTaskList(filters) && !shouldKeepTaskInCurrentList(updatedTask, filters);
+
+    if (shouldDelayRemoval) {
+      delayedRemovalCount.current += 1;
+      await delayActiveListRemoval(updatedTask, filters);
+      delayedRemovalCount.current -= 1;
+    }
+
+    setListState((currentList) =>
+      currentList.filter((task) => shouldKeepTaskInCurrentList(task, filters))
+    );
   };
 
   const handleArchive = async (taskId: Task['id'], isArchived: boolean) => {
-    await updateTask.mutateAsync({
+    const updatedTask = await updateTask.mutateAsync({
       id: taskId,
       data: { isArchived },
     });
+
+    setListState((currentList) =>
+      currentList.map((task) => (task.id === taskId ? updatedTask : task))
+    );
+
+    const shouldDelayRemoval =
+      isActiveTaskList(filters) && !shouldKeepTaskInCurrentList(updatedTask, filters);
+
+    if (shouldDelayRemoval) {
+      delayedRemovalCount.current += 1;
+      await delayActiveListRemoval(updatedTask, filters);
+      delayedRemovalCount.current -= 1;
+    }
+
+    setListState((currentList) =>
+      currentList.filter((task) => shouldKeepTaskInCurrentList(task, filters))
+    );
   };
 
   const handleReorder = async (

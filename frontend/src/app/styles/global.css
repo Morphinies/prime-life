@@ -35,3 +35,9 @@ html:has(._preloader) {
   margin: 0 auto;
   max-width: 900px;
 }
+
+.tasks-more-filter-active .ant-select-selector {
+  color: var(--ant-color-primary);
+  background: var(--ant-color-primary-bg) !important;
+  border-color: var(--ant-color-primary-border) !important;
+}

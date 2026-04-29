@@ -7,11 +7,15 @@ const content: {
 } = {
   headController: {
     periodFilters: [
+      { label: 'Все', value: 'all' },
       { label: 'Сегодня', value: 'day' },
       { label: 'Неделя', value: 'week' },
       { label: 'Месяц', value: 'month' },
+    ],
+    extraFilters: [
       { label: 'Просроченные', value: 'overdue' },
-      { label: 'Все', value: 'all' },
+      { label: 'Завершённые', value: 'completed' },
+      { label: 'Архив', value: 'archived' },
     ],
     viewSettings: [{ label: 'Список', value: 'list', iconName: 'BarsOutlined' }],
   },

@@ -20,11 +20,13 @@ type TaskCardData = Pick<Task, 'id'> &
 export type TaskProps = CheckboxProps &
   TaskCardData & {
     withSort?: boolean;
+    withActions?: boolean;
     handleEdit?: () => void;
     handleDelete?: () => void;
     handleArchive?: () => void;
     handleComplete?: () => void;
     withBottomDivider?: boolean;
+    withDoneStateDecoration?: boolean;
   };
 
 type TaskCheckboxProps = Pick<CheckboxProps, 'disabled'>;
@@ -76,9 +78,11 @@ export default function TaskCard({
   sortOrder,
   description,
   withSort = false,
+  withActions = true,
   isArchived = false,
   isCompleted = false,
   withBottomDivider = false,
+  withDoneStateDecoration = true,
   handleEdit,
   handleDelete,
   handleArchive,
@@ -90,6 +94,7 @@ export default function TaskCard({
   const checkboxProps: TaskCheckboxProps = {
     disabled: rest.disabled,
   };
+  const isDoneOrArchived = withDoneStateDecoration && (isCompleted || isArchived);
 
   return (
     <SortableItem id={id} isOff={!withSort} sortable={sortable}>
@@ -117,7 +122,12 @@ export default function TaskCard({
           {...(sortable ? sortable.listeners : {})}
           style={{ cursor: sortable?.isDragging ? 'grabbing' : 'pointer' }}
         >
-          <Flex vertical align="flex-start" gap="small">
+          <Flex
+            vertical
+            align="flex-start"
+            gap="small"
+            style={{ textDecoration: isDoneOrArchived ? 'line-through' : undefined }}
+          >
             {title && <Title level={5} children={title} />}
 
             {description && <Text type="secondary" children={description} />}
@@ -142,11 +152,14 @@ export default function TaskCard({
             )}
           </Flex>
         </Flex>
-        <ActionMenu
-          onArchive={() => handleArchive?.()}
-          onDelete={() => handleDelete?.()}
-          onEdit={() => handleEdit?.()}
-        />
+        {withActions && (
+          <ActionMenu
+            archiveLabel={isArchived ? 'Разархивировать' : 'Архивировать'}
+            onArchive={() => handleArchive?.()}
+            onDelete={() => handleDelete?.()}
+            onEdit={() => handleEdit?.()}
+          />
+        )}
       </Flex>
 
       {withBottomDivider && (

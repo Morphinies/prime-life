@@ -1,45 +1,74 @@
-import { useState } from 'react';
-import { Button, Flex } from 'antd';
-import type { ButtonProps } from 'antd/lib/button';
+import { Flex, Select, Typography } from 'antd';
+import type { ProjectListFilters, ProjectListView } from '@/entities/project';
 import Icon, { type IconName } from '@/shared/ui/Icon';
 
-export interface HeadControllerProps {
-  periodFilters: (ButtonProps & { iconName?: IconName })[];
-  viewSettings: (ButtonProps & { iconName?: IconName })[];
+const { Title } = Typography;
+
+type FilterOption = {
+  label: string;
+  value: string;
+  iconName?: IconName;
+};
+
+export interface HeadControllerConfigProps {
+  title: string;
+  projectFilters: FilterOption[];
+  viewSettings: FilterOption[];
 }
 
-const HeadController = ({ periodFilters, viewSettings }: HeadControllerProps) => {
-  const [filters, setFilters] = useState({ periodId: periodFilters[0].id });
-  const [settings, setSettings] = useState({ viewId: viewSettings[0].id });
+export interface HeadControllerProps extends HeadControllerConfigProps {
+  filters: ProjectListFilters;
+  onFiltersChange: (filters: ProjectListFilters) => void;
+}
 
+const HeadController = ({
+  filters,
+  title,
+  projectFilters,
+  viewSettings,
+  onFiltersChange,
+}: HeadControllerProps) => {
   return (
-    <Flex justify="space-between">
-      <Flex gap="small">
-        {periodFilters.map(({ children, id, iconName, ...rest }) => (
-          <Button
-            key={id}
-            variant="filled"
-            children={children}
-            icon={iconName ? <Icon name={iconName} /> : undefined}
-            color={filters.periodId === id ? 'blue' : 'default'}
-            onClick={() => setFilters((p) => ({ ...p, periodId: id }))}
-            {...rest}
-          />
-        ))}
+    <Flex vertical gap="large">
+      <Flex justify="flex-end" gap="small" wrap>
+        <Select
+          allowClear
+          value={filters.project}
+          placeholder="Проект"
+          style={{ minWidth: 180 }}
+          options={projectFilters.map(({ label, value }) => ({
+            label,
+            value,
+          }))}
+          onChange={(project) => onFiltersChange({ ...filters, project })}
+        />
+
+        <Select
+          value={filters.view}
+          style={{ width: 56 }}
+          placement="bottomRight"
+          popupMatchSelectWidth={false}
+          optionLabelProp="label"
+          onChange={(view) => onFiltersChange({ ...filters, view: view as ProjectListView })}
+        >
+          {viewSettings.map(({ label, value, iconName }) => (
+            <Select.Option
+              key={value}
+              value={value}
+              label={iconName ? <Icon name={iconName} /> : label}
+            >
+              <Flex gap="small" align="center">
+                {iconName ? <Icon name={iconName} /> : null}
+                <span>{label}</span>
+              </Flex>
+            </Select.Option>
+          ))}
+        </Select>
       </Flex>
-      <Flex gap="small">
-        {viewSettings.map(({ children, id, iconName, ...rest }) => (
-          <Button
-            key={id}
-            variant="link"
-            children={children}
-            icon={iconName ? <Icon name={iconName} /> : undefined}
-            color={settings.viewId === id ? 'blue' : 'default'}
-            onClick={() => setSettings((p) => ({ ...p, viewId: id }))}
-            {...rest}
-          />
-        ))}
-      </Flex>
+
+      <Title type="secondary" level={5}>
+        {title}
+      </Title>
     </Flex>
   );
 };

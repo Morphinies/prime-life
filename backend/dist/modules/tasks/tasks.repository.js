@@ -33,15 +33,25 @@ class TasksRepository {
             day: "deadline >= date_trunc('day', CURRENT_TIMESTAMP) AND deadline < date_trunc('day', CURRENT_TIMESTAMP) + interval '1 day'",
             week: "deadline >= date_trunc('week', CURRENT_TIMESTAMP) AND deadline < date_trunc('week', CURRENT_TIMESTAMP) + interval '1 week'",
             month: "deadline >= date_trunc('month', CURRENT_TIMESTAMP) AND deadline < date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month'",
-            overdue: "deadline IS NOT NULL AND deadline < date_trunc('day', CURRENT_TIMESTAMP) AND is_completed = false",
+            overdue: "deadline IS NOT NULL AND deadline < date_trunc('day', CURRENT_TIMESTAMP)",
+            completed: 'is_completed = true AND is_archived = false',
+            archived: 'is_archived = true',
         };
         const conditions = [];
         const values = [];
-        if (period !== 'all') {
+        if (period === 'completed') {
+            conditions.push(whereByPeriod.completed);
+        }
+        else if (period === 'archived') {
+            conditions.push(whereByPeriod.archived);
+        }
+        else {
+            conditions.push('is_completed = false');
+            conditions.push('is_archived = false');
             if (period === 'overdue') {
                 conditions.push(whereByPeriod.overdue);
             }
-            else {
+            else if (period !== 'all') {
                 conditions.push(`deadline IS NOT NULL AND ${whereByPeriod[period]}`);
             }
         }

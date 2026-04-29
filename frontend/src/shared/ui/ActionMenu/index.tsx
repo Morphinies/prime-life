@@ -6,9 +6,15 @@ interface ActionMenuProps {
   onEdit: () => void;
   onArchive: () => void;
   onDelete: () => void;
+  archiveLabel?: string;
 }
 
-const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onArchive, onDelete }) => {
+const ActionMenu: React.FC<ActionMenuProps> = ({
+  onEdit,
+  onArchive,
+  onDelete,
+  archiveLabel = 'Архивировать',
+}) => {
   return (
     <Dropdown
       menu={{
@@ -21,7 +27,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onArchive, onDelete }) 
           {
             key: 'archive',
             onClick: () => onArchive(),
-            label: 'Архивировать',
+            label: archiveLabel,
           },
           {
             key: 'delete',

@@ -6,9 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.taskPublicArraySchema = exports.reorderTasksSchema = exports.taskPublicSchema = exports.taskUpdateSchema = exports.taskCreateSchema = exports.taskDBSchema = exports.taskSchema = exports.taskListFiltersSchema = exports.taskListPeriodSchema = void 0;
 const zod_1 = require("../../shared/utils/zod");
 const zod_2 = __importDefault(require("zod"));
-exports.taskListPeriodSchema = zod_2.default.enum(['day', 'week', 'month', 'overdue', 'all']);
+exports.taskListPeriodSchema = zod_2.default.enum([
+    'day',
+    'week',
+    'month',
+    'overdue',
+    'completed',
+    'archived',
+    'all',
+]);
 exports.taskListFiltersSchema = zod_2.default.object({
-    period: exports.taskListPeriodSchema.optional().default('day'),
+    period: exports.taskListPeriodSchema.optional().default('all'),
     project: zod_2.default.string().optional(),
 });
 exports.taskSchema = zod_2.default.object({

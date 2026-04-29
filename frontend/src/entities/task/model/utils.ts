@@ -3,7 +3,7 @@ import 'dayjs/locale/ru';
 import type { TaskListFilters, TaskListPeriod, TaskListView } from './types';
 
 export const DEFAULT_TASK_LIST_FILTERS: TaskListFilters = {
-  period: 'day',
+  period: 'all',
   view: 'list',
   project: undefined,
 };
@@ -14,6 +14,8 @@ export function isTaskListPeriod(value: string | null | undefined): value is Tas
     value === 'week' ||
     value === 'month' ||
     value === 'overdue' ||
+    value === 'completed' ||
+    value === 'archived' ||
     value === 'all'
   );
 }
@@ -47,6 +49,14 @@ export function getTaskListTitle(filters: TaskListFilters, now = dayjs()) {
 
   if (filters.period === 'overdue') {
     return 'Просроченные';
+  }
+
+  if (filters.period === 'completed') {
+    return 'Завершённые';
+  }
+
+  if (filters.period === 'archived') {
+    return 'Архив';
   }
 
   if (filters.period === 'day') {

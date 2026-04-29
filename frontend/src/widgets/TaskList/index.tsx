@@ -12,6 +12,7 @@ export interface TaskListProps {
 }
 
 const TaskList = ({ filters, defaultList = [], modalTask }: TaskListProps) => {
+  const isActiveList = filters.period !== 'completed' && filters.period !== 'archived';
   const {
     taskEdit,
     filteredList,
@@ -35,6 +36,7 @@ const TaskList = ({ filters, defaultList = [], modalTask }: TaskListProps) => {
               key={task.id}
               withSort={true}
               withBottomDivider={true}
+              withDoneStateDecoration={isActiveList}
               handleEdit={() => showModal(task)}
               handleDelete={() => handleDelete(task.id)}
               handleArchive={() => handleArchive(task.id, !task.isArchived)}

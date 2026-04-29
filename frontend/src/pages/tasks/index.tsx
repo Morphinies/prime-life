@@ -1,16 +1,17 @@
-import { useSearchParams } from 'react-router';
+import {
+  getTaskListTitle,
+  getTaskListFilters,
+  type TaskListFilters,
+  DEFAULT_TASK_LIST_FILTERS,
+} from '@/entities/task';
 import { Flex } from 'antd';
 import content from './content';
 import type { Route } from '../+types/home';
+import { useSearchParams } from 'react-router';
 import HeadController from './ui/HeadController';
-import {
-  DEFAULT_TASK_LIST_FILTERS,
-  getTaskListFilters,
-  getTaskListTitle,
-  type Task,
-  type TaskListFilters,
-} from '@/entities/task';
+import type { Project } from '@/entities/project';
 import { taskApi } from '@/entities/task/api/task-api';
+import { projectApi } from '@/entities/project/api/project-api';
 import TaskList, { type TaskListProps } from '@/widgets/TaskList';
 
 type ProjectFilterOption = {
@@ -23,12 +24,13 @@ type LoaderData = {
   projectFilters: ProjectFilterOption[];
 };
 
-function getProjectFilters(tasks: Task[]): ProjectFilterOption[] {
-  return [...new Set(tasks.map((task) => task.project).filter((project): project is string => !!project))]
-    .sort((a, b) => a.localeCompare(b, 'ru'))
+function getProjectFilters(projects: Project[]): ProjectFilterOption[] {
+  return projects
+    .slice()
+    .sort((a, b) => a.title.localeCompare(b.title, 'ru'))
     .map((project) => ({
-      label: project,
-      value: project,
+      label: project.title,
+      value: project.title,
     }));
 }
 
@@ -36,19 +38,17 @@ export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData>
   const url = new URL(request.url);
   const filters = getTaskListFilters(url.searchParams);
 
-  const [taskListResp, allTasksResp] = await Promise.all([
+  const [taskListResp, allProjectsResp] = await Promise.all([
     taskApi.getList({
       period: filters.period,
       project: filters.project,
     }),
-    taskApi.getList({
-      period: 'all',
-    }),
+    projectApi.getList(),
   ]);
 
   return {
     taskList: taskListResp.data,
-    projectFilters: getProjectFilters(allTasksResp.data),
+    projectFilters: getProjectFilters(allProjectsResp.data),
   };
 }
 

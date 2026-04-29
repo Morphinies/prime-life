@@ -13,6 +13,7 @@ type FilterOption = {
 export interface HeadControllerConfigProps {
   title: string;
   periodFilters: FilterOption[];
+  extraFilters: FilterOption[];
   projectFilters: FilterOption[];
   viewSettings: FilterOption[];
 }
@@ -26,10 +27,13 @@ const HeadController = ({
   filters,
   title,
   periodFilters,
+  extraFilters,
   projectFilters,
   viewSettings,
   onFiltersChange,
 }: HeadControllerProps) => {
+  const activeExtraFilter = extraFilters.find(({ value }) => value === filters.period);
+
   return (
     <Flex vertical gap="large">
       <Flex justify="space-between" gap="middle" wrap>
@@ -45,6 +49,22 @@ const HeadController = ({
               {label}
             </Button>
           ))}
+
+          <Select
+            value={activeExtraFilter?.value}
+            placeholder="Ещё"
+            className={
+              activeExtraFilter ? 'tasks-more-filter tasks-more-filter-active' : 'tasks-more-filter'
+            }
+            style={{ minWidth: 96 }}
+            placement="bottomLeft"
+            popupMatchSelectWidth={false}
+            options={extraFilters.map(({ label, value }) => ({
+              label,
+              value,
+            }))}
+            onChange={(period) => onFiltersChange({ ...filters, period: period as TaskListPeriod })}
+          />
         </Flex>
 
         <Flex gap="small" wrap>

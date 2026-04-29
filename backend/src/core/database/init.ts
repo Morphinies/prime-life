@@ -22,6 +22,17 @@ export async function initDatabase() {
     `);
 
     await client.query(`
+      CREATE TABLE IF NOT EXISTS projects (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        title VARCHAR(100) NOT NULL UNIQUE,
+        description TEXT,
+        is_archived BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await client.query(`
       CREATE OR REPLACE FUNCTION update_updated_at_column()
       RETURNS TRIGGER AS $$
       BEGIN
@@ -37,6 +48,22 @@ export async function initDatabase() {
         BEFORE UPDATE ON tasks
         FOR EACH ROW
         EXECUTE FUNCTION update_updated_at_column();
+    `);
+
+    await client.query(`
+      DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
+      CREATE TRIGGER update_projects_updated_at
+        BEFORE UPDATE ON projects
+        FOR EACH ROW
+        EXECUTE FUNCTION update_updated_at_column();
+    `);
+
+    await client.query(`
+      INSERT INTO projects (title)
+      SELECT DISTINCT project
+      FROM tasks
+      WHERE project IS NOT NULL AND project <> ''
+      ON CONFLICT (title) DO NOTHING
     `);
 
     console.log('✅ Database initialized successfully');

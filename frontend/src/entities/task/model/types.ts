@@ -1,5 +1,12 @@
 export type TaskPriority = 'high' | 'medium' | 'low';
-export type TaskListPeriod = 'day' | 'week' | 'month' | 'overdue' | 'all';
+export type TaskListPeriod =
+  | 'day'
+  | 'week'
+  | 'month'
+  | 'overdue'
+  | 'completed'
+  | 'archived'
+  | 'all';
 export type TaskListView = 'list';
 
 export type Task = {
