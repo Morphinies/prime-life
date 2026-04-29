@@ -1,4 +1,5 @@
 export type ProjectListView = 'list';
+export type ProjectListStatus = 'active' | 'archived';
 
 export type Project = {
   id: string;
@@ -13,5 +14,6 @@ export type ProjectEdit = Partial<Project>;
 
 export type ProjectListFilters = {
   view: ProjectListView;
+  status: ProjectListStatus;
   project?: string;
 };

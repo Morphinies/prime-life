@@ -11,12 +11,19 @@ import {
   type ProjectListFilters,
   type UpdateProjectDto,
 } from '@/entities/project';
-import { useTaskList, type Task } from '@/entities/task';
+import {
+  useDeleteTask,
+  useTaskList,
+  useUpdateTask,
+  type Task,
+  type TaskEdit,
+} from '@/entities/task';
 
 type UseProjectsPageControllerParams = {
   filters: ProjectListFilters;
   defaultProjects?: Project[];
   defaultTasks?: Task[];
+  defaultAllTasks?: Task[];
 };
 
 type ProjectSection = {
@@ -48,17 +55,26 @@ export function useProjectsPageController({
   filters,
   defaultProjects = [],
   defaultTasks = [],
+  defaultAllTasks = [],
 }: UseProjectsPageControllerParams) {
   const [projectEdit, setProjectEdit] = useState<ProjectEdit | null>(null);
+  const [taskEdit, setTaskEdit] = useState<TaskEdit | null>(null);
+  const [projectForTaskAdding, setProjectForTaskAdding] = useState<Project | null>(null);
+  const [locallyAddedTasks, setLocallyAddedTasks] = useState<Task[]>([]);
+  const [locallyRemovedTaskIds, setLocallyRemovedTaskIds] = useState<Task['id'][]>([]);
 
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
 
   const modalProjectError =
     updateProject.error?.message || createProject.error?.message || deleteProject.error?.message;
+  const addTaskToProjectError = updateTask.error?.message;
+  const modalTaskError = updateTask.error?.message || deleteTask.error?.message;
 
-  const queryFilters = { project: filters.project };
+  const queryFilters = { project: filters.project, status: filters.status };
   const { data: projects = defaultProjects } = useProjectList(queryFilters, {
     initialData: defaultProjects,
   });
@@ -68,14 +84,44 @@ export function useProjectsPageController({
       initialData: defaultTasks,
     }
   );
+  const { data: allTasks = defaultAllTasks } = useTaskList(
+    { period: 'all' },
+    {
+      initialData: defaultAllTasks,
+    }
+  );
+
+  const tasksForSections = useMemo(() => {
+    const taskById = new Map(tasks.map((task) => [task.id, task]));
+
+    locallyAddedTasks.forEach((task) => {
+      taskById.set(task.id, task);
+    });
+
+    locallyRemovedTaskIds.forEach((taskId) => {
+      taskById.delete(taskId);
+    });
+
+    return [...taskById.values()];
+  }, [locallyAddedTasks, locallyRemovedTaskIds, tasks]);
+
+  const tasksAvailableForAdding = useMemo(
+    () =>
+      allTasks.filter(
+        (task) => !task.project && !locallyAddedTasks.some(({ id }) => id === task.id)
+      ),
+    [allTasks, locallyAddedTasks]
+  );
 
   const projectsWithSections = useMemo<ProjectWithSections[]>(
     () =>
       projects.map((project) => ({
         ...project,
-        sections: getProjectSections(tasks.filter((task) => task.project === project.title)),
+        sections: getProjectSections(
+          tasksForSections.filter((task) => task.project === project.title)
+        ),
       })),
-    [projects, tasks]
+    [projects, tasksForSections]
   );
 
   const [defaultProject] = useState<ProjectEdit>({
@@ -118,6 +164,99 @@ export function useProjectsPageController({
     setProjectEdit(null);
   };
 
+  const showTaskModal = (task: Task) => {
+    setTaskEdit({
+      id: task.id,
+      title: task.title,
+      section: task.section,
+      project: task.project,
+      priority: task.priority,
+      description: task.description,
+      isCompleted: task.isCompleted,
+      deadline: task.deadline,
+    });
+  };
+
+  const hideTaskModal = () => {
+    setTaskEdit(null);
+  };
+
+  const showAddTasksModal = (project: Project) => {
+    setProjectForTaskAdding(project);
+  };
+
+  const hideAddTasksModal = () => {
+    setProjectForTaskAdding(null);
+  };
+
+  const handleAddTaskToProject = async (taskId: Task['id']) => {
+    if (!projectForTaskAdding) return;
+
+    const updatedTask = await updateTask.mutateAsync({
+      id: taskId,
+      data: { project: projectForTaskAdding.title },
+    });
+
+    setLocallyAddedTasks((currentTasks) => [
+      ...currentTasks.filter((task) => task.id !== updatedTask.id),
+      updatedTask,
+    ]);
+  };
+
+  const handleTaskSubmit = async (task: TaskEdit) => {
+    if (!taskEdit?.id) return;
+
+    const updatedTask = await updateTask.mutateAsync({
+      id: taskEdit.id,
+      data: getEditedObject(taskEdit, task),
+    });
+
+    setLocallyAddedTasks((currentTasks) => [
+      ...currentTasks.filter((task) => task.id !== updatedTask.id),
+      updatedTask,
+    ]);
+    setTaskEdit(null);
+  };
+
+  const handleTaskComplete = async (taskId: Task['id'], isCompleted: boolean) => {
+    const updatedTask = await updateTask.mutateAsync({
+      id: taskId,
+      data: { isCompleted },
+    });
+
+    if (updatedTask.isCompleted || updatedTask.isArchived) {
+      setLocallyRemovedTaskIds((currentIds) => [...new Set([...currentIds, updatedTask.id])]);
+      return;
+    }
+
+    setLocallyAddedTasks((currentTasks) => [
+      ...currentTasks.filter((task) => task.id !== updatedTask.id),
+      updatedTask,
+    ]);
+  };
+
+  const handleTaskArchive = async (taskId: Task['id'], isArchived: boolean) => {
+    const updatedTask = await updateTask.mutateAsync({
+      id: taskId,
+      data: { isArchived },
+    });
+
+    if (updatedTask.isCompleted || updatedTask.isArchived) {
+      setLocallyRemovedTaskIds((currentIds) => [...new Set([...currentIds, updatedTask.id])]);
+      return;
+    }
+
+    setLocallyAddedTasks((currentTasks) => [
+      ...currentTasks.filter((task) => task.id !== updatedTask.id),
+      updatedTask,
+    ]);
+  };
+
+  const handleTaskDelete = async (taskId: Task['id']) => {
+    await deleteTask.mutateAsync(taskId);
+    setLocallyRemovedTaskIds((currentIds) => [...new Set([...currentIds, taskId])]);
+  };
+
   const showModal = (project?: Project) => {
     if (!project) {
       setProjectEdit(defaultProject);
@@ -134,12 +273,27 @@ export function useProjectsPageController({
 
   return {
     projectEdit,
+    taskEdit,
+    projectForTaskAdding,
     projects: projectsWithSections,
+    tasksAvailableForAdding,
     showModal,
     hideModal,
+    showTaskModal,
+    hideTaskModal,
+    showAddTasksModal,
+    hideAddTasksModal,
     handleSubmit,
     handleDelete,
     handleArchive,
+    handleAddTaskToProject,
+    handleTaskSubmit,
+    handleTaskComplete,
+    handleTaskArchive,
+    handleTaskDelete,
     modalProjectError,
+    modalTaskError,
+    addTaskToProjectError,
+    isAddingTaskToProject: updateTask.isPending,
   };
 }

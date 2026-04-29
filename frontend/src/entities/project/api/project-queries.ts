@@ -1,10 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectApi } from './project-api';
 import type { UseQueryOptions } from '@/shared/api/types';
-import type { CreateProjectDto, Project, ProjectListFilters, UpdateProjectDto } from '../model/types';
+import type {
+  CreateProjectDto,
+  Project,
+  ProjectListFilters,
+  UpdateProjectDto,
+} from '../model/types';
 import { taskKeys } from '@/entities/task';
 
-type ProjectListRequestFilters = Pick<ProjectListFilters, 'project'>;
+type ProjectListRequestFilters = Pick<ProjectListFilters, 'project' | 'status'>;
 
 export const projectKeys = {
   all: ['projects'] as const,

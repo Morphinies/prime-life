@@ -9,12 +9,7 @@ import type {
 } from './projects.types';
 
 export class ProjectsRepository {
-  transformProjectToDB({
-    createdAt,
-    updatedAt,
-    isArchived,
-    ...project
-  }: Project): ProjectDB {
+  transformProjectToDB({ createdAt, updatedAt, isArchived, ...project }: Project): ProjectDB {
     return {
       ...project,
       created_at: createdAt,
@@ -23,12 +18,7 @@ export class ProjectsRepository {
     };
   }
 
-  transformProjectFromDB({
-    created_at,
-    updated_at,
-    is_archived,
-    ...project
-  }: ProjectDB): Project {
+  transformProjectFromDB({ created_at, updated_at, is_archived, ...project }: ProjectDB): Project {
     return {
       ...project,
       createdAt: created_at,
@@ -40,6 +30,8 @@ export class ProjectsRepository {
   async findAll(filters: ProjectListFilters): Promise<Project[]> {
     const conditions: string[] = [];
     const values: unknown[] = [];
+
+    conditions.push(filters.status === 'archived' ? 'is_archived = true' : 'is_archived = false');
 
     if (filters.project) {
       values.push(filters.project);

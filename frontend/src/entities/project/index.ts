@@ -4,6 +4,7 @@ export type {
   UpdateProjectDto,
   ProjectEdit,
   ProjectListFilters,
+  ProjectListStatus,
   ProjectListView,
 } from './model/types';
 

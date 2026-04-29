@@ -24,6 +24,7 @@ type LoaderData = {
   projectList: Project[];
   allProjects: Project[];
   taskList: Task[];
+  allTaskList: Task[];
 };
 
 function getProjectFilters(projects: Project[]): ProjectFilterOption[] {
@@ -37,29 +38,48 @@ export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData>
   const url = new URL(request.url);
   const filters = getProjectListFilters(url.searchParams);
 
-  const [projectListResp, allProjectsResp, taskListResp] = await Promise.all([
-    projectApi.getList(filters.project ? { project: filters.project } : undefined),
+  const [projectListResp, allProjectsResp, taskListResp, allTaskListResp] = await Promise.all([
+    projectApi.getList({
+      status: filters.status,
+      project: filters.project,
+    }),
     projectApi.getList(),
     taskApi.getList({
       period: 'all',
       project: filters.project,
     }),
+    taskApi.getList({ period: 'all' }),
   ]);
 
   return {
     projectList: projectListResp.data,
     allProjects: allProjectsResp.data,
     taskList: taskListResp.data,
+    allTaskList: allTaskListResp.data,
   };
 }
 
 export default function Projects({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { projectList, allProjects, taskList } = (loaderData || {}) as LoaderData;
-  const { headController, modalProject } = content;
+  const { projectList, allProjects, taskList, allTaskList } = (loaderData || {}) as LoaderData;
+  const { headController, modalProject, modalTask } = content;
   const filters = getProjectListFilters(searchParams);
   const title = getProjectListTitle(filters);
   const projectFilters = getProjectFilters(allProjects);
+  const taskModal = {
+    ...modalTask,
+    fieldSets: modalTask.fieldSets?.map((fieldSet) => ({
+      ...fieldSet,
+      fields: fieldSet.fields.map((field) =>
+        field.name === 'project'
+          ? {
+              ...field,
+              options: projectFilters,
+            }
+          : field
+      ),
+    })),
+  };
 
   const handleFiltersChange = (nextFilters: ProjectListFilters) => {
     const nextSearchParams = new URLSearchParams(searchParams);
@@ -76,6 +96,12 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
       nextSearchParams.set('project', nextFilters.project);
     }
 
+    if (nextFilters.status === DEFAULT_PROJECT_LIST_FILTERS.status) {
+      nextSearchParams.delete('status');
+    } else {
+      nextSearchParams.set('status', nextFilters.status);
+    }
+
     setSearchParams(nextSearchParams);
   };
 
@@ -90,8 +116,10 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
       />
       <TasksSections
         filters={filters}
+        modalTask={taskModal}
         modalProject={modalProject}
         defaultTasks={taskList}
+        defaultAllTasks={allTaskList}
         defaultProjects={projectList}
       />
     </Flex>
