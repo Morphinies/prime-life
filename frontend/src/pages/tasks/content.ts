@@ -21,39 +21,46 @@ const content: {
   },
   tasks: {
     modalTask: {
-      fields: [
+      fieldSets: [
         {
-          name: 'title',
-          placeholder: 'Название задачи',
-          rules: [{ required: true, message: 'Пожалуйста, укажите название задачи' }],
-        },
-        {
-          type: 'textarea',
-          name: 'description',
-          placeholder: 'Описание',
-        },
-      ],
-      bottomFields: [
-        {
-          type: 'select',
-          name: 'priority',
-          placeholder: 'Приоритет',
-          options: [
-            { label: 'Низкий', value: 'low' },
-            { label: 'Средний', value: 'medium' },
-            { label: 'Высокий', value: 'high' },
+          fields: [
+            {
+              name: 'title',
+              placeholder: 'Название задачи',
+              rules: [{ required: true, message: 'Пожалуйста, укажите название задачи' }],
+            },
+            {
+              type: 'textarea',
+              name: 'description',
+              placeholder: 'Описание',
+            },
+            {
+              type: 'select',
+              name: 'project',
+              placeholder: 'Проект',
+              options: [],
+            },
           ],
         },
         {
-          type: 'select',
-          name: 'project',
-          placeholder: 'Проект',
-          options: [],
-        },
-        {
-          type: 'date',
-          name: 'deadline',
-          placeholder: 'Дедлайн',
+          vertical: false,
+          fields: [
+            {
+              type: 'select',
+              name: 'priority',
+              placeholder: 'Приоритет',
+              options: [
+                { label: 'Низкий', value: 'low' },
+                { label: 'Средний', value: 'medium' },
+                { label: 'Высокий', value: 'high' },
+              ],
+            },
+            {
+              type: 'date',
+              name: 'deadline',
+              placeholder: 'Дедлайн',
+            },
+          ],
         },
       ],
     },

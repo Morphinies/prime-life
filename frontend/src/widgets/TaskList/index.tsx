@@ -8,7 +8,7 @@ import { useTaskListController } from './useTaskListController';
 export interface TaskListProps {
   filters: TaskListFilters;
   defaultList?: Task[];
-  modalTask: Pick<ModalTaskProps, 'fields' | 'bottomFields'>;
+  modalTask: Pick<ModalTaskProps, 'fields' | 'fieldSets'>;
 }
 
 const TaskList = ({ filters, defaultList = [], modalTask }: TaskListProps) => {

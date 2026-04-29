@@ -49,7 +49,7 @@ export function Fieldset({ fields, vertical = true }: FieldsetProps) {
               <TextArea rows={12} styles={{ textarea: { resize: 'none' } }} {...inputProps} />
             )}
             {type === 'select' && <Select options={options} allowClear {...inputProps} />}
-            {type === 'date' && <DatePicker {...inputProps} />}
+            {type === 'date' && <DatePicker style={{ width: '100%' }} {...inputProps} />}
           </Form.Item>
         );
       })}

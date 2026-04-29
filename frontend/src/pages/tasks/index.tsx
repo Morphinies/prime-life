@@ -60,14 +60,17 @@ export default function Tasks({ loaderData }: Route.ComponentProps) {
   const title = getTaskListTitle(filters);
   const modalTask = {
     ...tasks.modalTask,
-    bottomFields: tasks.modalTask.bottomFields.map((field) =>
-      field.name === 'project'
-        ? {
-            ...field,
-            options: projectFilters,
-          }
-        : field
-    ),
+    fieldSets: tasks.modalTask.fieldSets?.map((fieldSet) => ({
+      ...fieldSet,
+      fields: fieldSet.fields.map((field) =>
+        field.name === 'project'
+          ? {
+              ...field,
+              options: projectFilters,
+            }
+          : field
+      ),
+    })),
   };
 
   const handleFiltersChange = (nextFilters: TaskListFilters) => {

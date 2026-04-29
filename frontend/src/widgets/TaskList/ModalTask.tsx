@@ -5,12 +5,14 @@ import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import { Fieldset, type FieldsetProps } from '@/shared/ui/Fieldset';
 import { Alert, Form, Modal, type FormProps, type ModalProps } from 'antd';
 
+type ModalTaskFieldSet = FieldsetProps;
+
 export interface ModalTaskProps {
   error?: string;
   form?: FormProps;
   taskEdit?: TaskEdit | null;
-  fields: FieldsetProps['fields'];
-  bottomFields: FieldsetProps['fields'];
+  fields?: FieldsetProps['fields'];
+  fieldSets?: ModalTaskFieldSet[];
   handleSubmit: (task: TaskEdit) => void;
   modal: ModalProps & { toggle?: (v: boolean) => void };
 }
@@ -20,7 +22,7 @@ const ModalTask = ({
   modal,
   fields,
   taskEdit,
-  bottomFields,
+  fieldSets,
   handleSubmit,
   form: formProps,
 }: ModalTaskProps) => {
@@ -43,6 +45,7 @@ const ModalTask = ({
   }, [form, taskEdit]);
 
   const submitLabel = taskEdit?.id ? 'Обновить' : 'Добавить';
+  const preparedFieldSets = fieldSets || (fields ? [{ fields }] : []);
 
   return (
     <Modal
@@ -78,8 +81,9 @@ const ModalTask = ({
         initialValues={{ remember: true }}
         {...formProps}
       >
-        <Fieldset fields={fields} />
-        <Fieldset fields={bottomFields} vertical={false} />
+        {preparedFieldSets.map(({ fields, ...config }, index) => (
+          <Fieldset key={index} fields={fields} {...config} />
+        ))}
       </Form>
       {error && <Alert title={error} type="error" showIcon />}
     </Modal>
