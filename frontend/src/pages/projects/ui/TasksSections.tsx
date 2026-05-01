@@ -194,6 +194,16 @@ const TasksSections = ({
           onCancel: hideModal,
           toggle: () => (projectEdit ? showModal() : hideModal()),
         }}
+        handleArchive={(project) => {
+          if (!project.id) return;
+          handleArchive(project.id, !project.isArchived);
+          hideModal();
+        }}
+        handleDelete={(project) => {
+          if (!project.id) return;
+          confirmDelete(project.id);
+          hideModal();
+        }}
         handleSubmit={handleSubmit}
         {...modalProject}
       />

@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Alert, Form, Modal, type FormProps, type ModalProps } from 'antd';
+import { Alert, Button, Form, Modal, Tooltip, type FormProps, type ModalProps } from 'antd';
 import type { ProjectEdit } from '@/entities/project';
 import { Fieldset, type FieldsetProps } from '@/shared/ui/Fieldset';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import ModalFooter from '@/shared/ui/ModalFooter';
+import Icon from '@/shared/ui/Icon';
 
 export interface ModalProjectProps {
   error?: string;
   form?: FormProps;
   projectEdit?: ProjectEdit | null;
   fields: FieldsetProps['fields'];
+  handleArchive?: (project: ProjectEdit) => void;
+  handleDelete?: (project: ProjectEdit) => void;
   handleSubmit: (project: ProjectEdit) => void;
   modal: ModalProps & { toggle?: (v: boolean) => void };
 }
@@ -19,6 +22,8 @@ const ModalProject = ({
   modal,
   fields,
   projectEdit,
+  handleArchive,
+  handleDelete,
   handleSubmit,
   form: formProps,
 }: ModalProjectProps) => {
@@ -45,6 +50,32 @@ const ModalProject = ({
   const submitLabel = projectEdit?.id ? 'Обновить' : 'Добавить';
   const title = projectEdit?.id ? 'Редактировать проект' : 'Добавить проект';
   const formId = 'project-form';
+  const titleActions = (
+    <div className="modal-title-actions">
+      {projectEdit?.id && handleArchive && (
+        <Tooltip title={projectEdit.isArchived ? 'Разархивировать' : 'Архивировать'}>
+          <Button
+            type="text"
+            className="modal-title-action-button"
+            icon={<Icon name={projectEdit.isArchived ? 'UndoOutlined' : 'InboxOutlined'} />}
+            onClick={() => handleArchive(projectEdit)}
+          />
+        </Tooltip>
+      )}
+
+      {projectEdit?.id && handleDelete && (
+        <Tooltip title="Удалить">
+          <Button
+            danger
+            type="text"
+            className="modal-title-action-button"
+            icon={<Icon name="DeleteOutlined" />}
+            onClick={() => handleDelete(projectEdit)}
+          />
+        </Tooltip>
+      )}
+    </div>
+  );
 
   const handleFinish = () => {
     handleSubmit({
@@ -61,6 +92,7 @@ const ModalProject = ({
       }}
       styles={{
         container: { paddingTop: cssVar.sizeXXL },
+        header: { paddingRight: projectEdit?.id ? 112 : undefined },
       }}
       closable={{ 'aria-label': 'Закрыть' }}
       footer={
@@ -78,6 +110,7 @@ const ModalProject = ({
       }
       {...modal}
     >
+      {titleActions}
       <Form
         id={formId}
         form={form}
