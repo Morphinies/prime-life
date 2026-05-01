@@ -1,4 +1,5 @@
-import { Button, Flex } from 'antd';
+import { Flex } from 'antd';
+import { useEffect, useRef } from 'react';
 import { type Task, type TaskListFilters } from '@/entities/task';
 import TaskCard from '@/entities/task/ui/TaskCard';
 import { SortContext } from '@/shared/ui/SortContext';
@@ -8,11 +9,18 @@ import { useTaskListController } from './useTaskListController';
 export interface TaskListProps {
   filters: TaskListFilters;
   defaultList?: Task[];
+  createTaskSignal?: number;
   modalTask: Pick<ModalTaskProps, 'fields' | 'fieldSets'>;
 }
 
-const TaskList = ({ filters, defaultList = [], modalTask }: TaskListProps) => {
+const TaskList = ({
+  filters,
+  defaultList = [],
+  createTaskSignal = 0,
+  modalTask,
+}: TaskListProps) => {
   const isActiveList = filters.period !== 'completed' && filters.period !== 'archived';
+  const handledCreateTaskSignal = useRef(createTaskSignal);
   const {
     taskEdit,
     filteredList,
@@ -25,6 +33,13 @@ const TaskList = ({ filters, defaultList = [], modalTask }: TaskListProps) => {
     handleComplete,
     modalTaskError,
   } = useTaskListController({ defaultList, filters });
+
+  useEffect(() => {
+    if (createTaskSignal > handledCreateTaskSignal.current) {
+      handledCreateTaskSignal.current = createTaskSignal;
+      showModal();
+    }
+  }, [createTaskSignal, showModal]);
 
   return (
     <Flex vertical gap="large">
@@ -46,13 +61,6 @@ const TaskList = ({ filters, defaultList = [], modalTask }: TaskListProps) => {
         </Flex>
       </SortContext>
 
-      <Button
-        type="link"
-        onClick={() => showModal()}
-        children="+ Добавить задачу"
-        styles={{ root: { width: 'fit-content', padding: 0 } }}
-      />
-
       <ModalTask
         taskEdit={taskEdit}
         error={modalTaskError}
@@ -60,6 +68,16 @@ const TaskList = ({ filters, defaultList = [], modalTask }: TaskListProps) => {
           open: !!taskEdit,
           onCancel: hideModal,
           toggle: () => (taskEdit ? showModal() : hideModal()),
+        }}
+        handleArchive={(task) => {
+          if (!task.id) return;
+          handleArchive(task.id, !task.isArchived);
+          hideModal();
+        }}
+        handleDelete={(task) => {
+          if (!task.id) return;
+          handleDelete(task.id);
+          hideModal();
         }}
         handleSubmit={handleSubmit}
         {...modalTask}

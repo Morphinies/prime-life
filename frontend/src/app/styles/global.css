@@ -62,6 +62,32 @@ html:has(._preloader) {
   background: var(--ant-color-fill-secondary);
 }
 
+.head-controller-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-bottom: var(--ant-margin-lg);
+  background: var(--ant-color-bg-layout);
+}
+
+.modal-title-actions {
+  position: absolute;
+  top: 12px;
+  right: 48px;
+  z-index: 1;
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.modal-title-action-button.ant-btn.ant-btn-icon-only .ant-btn-icon {
+  display: flex;
+}
+
+.modal-title-action-button.ant-btn.ant-btn-icon-only .anticon {
+  font-size: 16px;
+}
+
 .tasks-more-filter-active .ant-select-selector {
   color: var(--ant-color-primary);
   background: var(--ant-color-primary-bg) !important;

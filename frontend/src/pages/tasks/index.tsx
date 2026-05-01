@@ -7,6 +7,7 @@ import {
 import { Flex } from 'antd';
 import content from './content';
 import type { Route } from '../+types/home';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import HeadController from './ui/HeadController';
 import type { Project } from '@/entities/project';
@@ -54,6 +55,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData>
 
 export default function Tasks({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [createTaskSignal, setCreateTaskSignal] = useState(0);
   const { taskList, projectFilters } = (loaderData || {}) as LoaderData;
   const { headController, tasks } = content;
   const filters = getTaskListFilters(searchParams);
@@ -98,15 +100,21 @@ export default function Tasks({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <Flex vertical gap="large" className="container">
+    <Flex vertical className="container">
       <HeadController
         {...headController}
         title={title}
         projectFilters={projectFilters}
         filters={filters}
+        onAddTask={() => setCreateTaskSignal((signal) => signal + 1)}
         onFiltersChange={handleFiltersChange}
       />
-      <TaskList modalTask={modalTask} filters={filters} defaultList={taskList} />
+      <TaskList
+        modalTask={modalTask}
+        filters={filters}
+        defaultList={taskList}
+        createTaskSignal={createTaskSignal}
+      />
     </Flex>
   );
 }

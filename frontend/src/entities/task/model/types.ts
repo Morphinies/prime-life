@@ -12,10 +12,10 @@ export type TaskListView = 'list';
 export type Task = {
   id: string;
   title?: string;
-  section?: string;
-  project?: string;
+  section?: string | null;
+  project?: string | null;
   deadline?: string;
-  description?: string;
+  description?: string | null;
   priority?: TaskPriority;
   isCompleted?: boolean;
   isArchived?: boolean;

@@ -1,24 +1,19 @@
-import { Button, Flex, Select, Typography } from 'antd';
 import type { ProjectListFilters, ProjectListStatus, ProjectListView } from '@/entities/project';
-import Icon, { type IconName } from '@/shared/ui/Icon';
-
-const { Title } = Typography;
-
-type FilterOption = {
-  label: string;
-  value: string;
-  iconName?: IconName;
-};
+import {
+  HeadController as SharedHeadController,
+  type HeadControllerOption,
+} from '@/shared/ui/HeadController';
 
 export interface HeadControllerConfigProps {
   title: string;
-  statusFilters: FilterOption[];
-  projectFilters: FilterOption[];
-  viewSettings: FilterOption[];
+  statusFilters: HeadControllerOption[];
+  projectFilters: HeadControllerOption[];
+  viewSettings: HeadControllerOption[];
 }
 
 export interface HeadControllerProps extends HeadControllerConfigProps {
   filters: ProjectListFilters;
+  onAddProject?: () => void;
   onFiltersChange: (filters: ProjectListFilters) => void;
 }
 
@@ -28,65 +23,38 @@ const HeadController = ({
   statusFilters,
   projectFilters,
   viewSettings,
+  onAddProject,
   onFiltersChange,
 }: HeadControllerProps) => {
   return (
-    <Flex vertical gap="large">
-      <Flex justify="space-between" gap="middle" wrap>
-        <Flex gap="small" wrap>
-          {statusFilters.map(({ label, value }) => (
-            <Button
-              key={value}
-              variant="filled"
-              color={filters.status === (value as ProjectListStatus) ? 'blue' : 'default'}
-              onClick={() => onFiltersChange({ ...filters, status: value as ProjectListStatus })}
-            >
-              {label}
-            </Button>
-          ))}
-        </Flex>
-
-        <Flex gap="small" wrap>
-          <Select
-            allowClear
-            value={filters.project}
-            placeholder="Проект"
-            style={{ minWidth: 180 }}
-            options={projectFilters.map(({ label, value }) => ({
-              label,
-              value,
-            }))}
-            onChange={(project) => onFiltersChange({ ...filters, project })}
-          />
-
-          <Select
-            value={filters.view}
-            style={{ width: 56 }}
-            placement="bottomRight"
-            popupMatchSelectWidth={false}
-            optionLabelProp="label"
-            onChange={(view) => onFiltersChange({ ...filters, view: view as ProjectListView })}
-          >
-            {viewSettings.map(({ label, value, iconName }) => (
-              <Select.Option
-                key={value}
-                value={value}
-                label={iconName ? <Icon name={iconName} /> : label}
-              >
-                <Flex gap="small" align="center">
-                  {iconName ? <Icon name={iconName} /> : null}
-                  <span>{label}</span>
-                </Flex>
-              </Select.Option>
-            ))}
-          </Select>
-        </Flex>
-      </Flex>
-
-      <Title type="secondary" level={5}>
-        {title}
-      </Title>
-    </Flex>
+    <SharedHeadController
+      title={title}
+      titleAction={
+        onAddProject && filters.status === 'active'
+          ? {
+              label: '+ Добавить проект',
+              onClick: onAddProject,
+            }
+          : undefined
+      }
+      buttonFilters={statusFilters.map((filter) => ({
+        ...filter,
+        active: filters.status === (filter.value as ProjectListStatus),
+        onClick: () => onFiltersChange({ ...filters, status: filter.value as ProjectListStatus }),
+      }))}
+      projectFilter={{
+        allowClear: true,
+        value: filters.project,
+        placeholder: 'Проект',
+        options: projectFilters,
+        onChange: (project) => onFiltersChange({ ...filters, project }),
+      }}
+      viewSelect={{
+        value: filters.view,
+        options: viewSettings,
+        onChange: (view) => onFiltersChange({ ...filters, view: view as ProjectListView }),
+      }}
+    />
   );
 };
 

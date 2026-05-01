@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router';
 import { Flex } from 'antd';
 import content from './content';
 import type { Route } from '../+types/home';
+import { useState } from 'react';
 import TasksSections from './ui/TasksSections';
 import HeadController from './ui/HeadController';
 import {
@@ -61,6 +62,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData>
 
 export default function Projects({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [createProjectSignal, setCreateProjectSignal] = useState(0);
   const { projectList, allProjects, taskList, allTaskList } = (loaderData || {}) as LoaderData;
   const { headController, modalProject, modalTask } = content;
   const filters = getProjectListFilters(searchParams);
@@ -106,18 +108,20 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <Flex vertical gap="large" className="container">
+    <Flex vertical className="container">
       <HeadController
         {...headController}
         title={title}
         projectFilters={projectFilters}
         filters={filters}
+        onAddProject={() => setCreateProjectSignal((signal) => signal + 1)}
         onFiltersChange={handleFiltersChange}
       />
       <TasksSections
         filters={filters}
         modalTask={taskModal}
         modalProject={modalProject}
+        createProjectSignal={createProjectSignal}
         defaultTasks={taskList}
         defaultAllTasks={allTaskList}
         defaultProjects={projectList}

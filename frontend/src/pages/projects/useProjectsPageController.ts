@@ -183,14 +183,19 @@ export function useProjectsPageController({
 
   const showCreateTaskModal = () => {
     if (!projectForTaskAdding) return;
+    const projectTitle = projectForTaskAdding.title;
 
-    setTaskEdit({
-      title: '',
-      description: '',
-      project: projectForTaskAdding.title,
-      isCompleted: false,
-      deadline: undefined,
-      priority: undefined,
+    setProjectForTaskAdding(null);
+
+    window.setTimeout(() => {
+      setTaskEdit({
+        title: '',
+        description: '',
+        project: projectTitle,
+        isCompleted: false,
+        deadline: undefined,
+        priority: undefined,
+      });
     });
   };
 

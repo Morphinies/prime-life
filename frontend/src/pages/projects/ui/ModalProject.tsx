@@ -44,6 +44,14 @@ const ModalProject = ({
 
   const submitLabel = projectEdit?.id ? 'Обновить' : 'Добавить';
   const title = projectEdit?.id ? 'Редактировать проект' : 'Добавить проект';
+  const formId = 'project-form';
+
+  const handleFinish = () => {
+    handleSubmit({
+      ...projectEdit,
+      ...form.getFieldsValue(),
+    });
+  };
 
   return (
     <Modal
@@ -60,13 +68,10 @@ const ModalProject = ({
           buttons={[
             {
               type: 'primary',
+              htmlType: 'submit',
+              form: formId,
               disabled: !isValid,
               children: submitLabel,
-              onClick: () =>
-                handleSubmit({
-                  ...projectEdit,
-                  ...form.getFieldsValue(),
-                }),
             },
           ]}
         />
@@ -74,10 +79,12 @@ const ModalProject = ({
       {...modal}
     >
       <Form
+        id={formId}
         form={form}
         name="project"
         autoComplete="off"
         initialValues={{ remember: true }}
+        onFinish={handleFinish}
         {...formProps}
       >
         <Fieldset fields={fields} />

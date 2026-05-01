@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Button, Card, Divider, Empty, Flex, Modal, Typography } from 'antd';
 import { useThemeMode } from '@/features/theme';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
@@ -16,6 +16,7 @@ export interface TasksSectionsProps {
   filters: ProjectListFilters;
   defaultTasks?: Task[];
   defaultAllTasks?: Task[];
+  createProjectSignal?: number;
   defaultProjects?: {
     id: string;
     title: string;
@@ -30,10 +31,12 @@ const TasksSections = ({
   filters,
   defaultTasks = [],
   defaultAllTasks = [],
+  createProjectSignal = 0,
   defaultProjects = [],
   modalProject,
   modalTask,
 }: TasksSectionsProps) => {
+  const handledCreateProjectSignal = useRef(createProjectSignal);
   const { cssVar } = useThemeToken();
   const { isDarkTheme } = useThemeMode();
   const {
@@ -69,6 +72,13 @@ const TasksSections = ({
   });
 
   const isEmpty = useMemo(() => projects.length === 0, [projects.length]);
+
+  useEffect(() => {
+    if (createProjectSignal > handledCreateProjectSignal.current) {
+      handledCreateProjectSignal.current = createProjectSignal;
+      showModal();
+    }
+  }, [createProjectSignal, showModal]);
 
   const confirmDelete = (projectId: string) => {
     Modal.confirm({
@@ -176,14 +186,6 @@ const TasksSections = ({
         </Flex>
       )}
 
-      <Button
-        type="link"
-        onClick={() => showModal()}
-        styles={{ root: { width: 'fit-content', padding: 0 } }}
-      >
-        + Добавить проект
-      </Button>
-
       <ModalProject
         projectEdit={projectEdit}
         error={modalProjectError}
@@ -203,6 +205,16 @@ const TasksSections = ({
           open: !!taskEdit,
           onCancel: hideTaskModal,
           toggle: hideTaskModal,
+        }}
+        handleArchive={(task) => {
+          if (!task.id) return;
+          handleTaskArchive(task.id, !task.isArchived);
+          hideTaskModal();
+        }}
+        handleDelete={(task) => {
+          if (!task.id) return;
+          handleTaskDelete(task.id);
+          hideTaskModal();
         }}
         handleSubmit={handleTaskSubmit}
         {...modalTask}
