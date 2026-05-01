@@ -1,6 +1,7 @@
 import { Button, Flex, Input, Select, Typography } from 'antd';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Icon, { type IconName } from '@/shared/ui/Icon';
+import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 
 const { Title } = Typography;
 
@@ -63,6 +64,36 @@ export function HeadController({
   leftSelectFilters = [],
   viewSelect,
 }: HeadControllerProps) {
+  const { token } = useThemeToken();
+  const [searchValue, setSearchValue] = useState(searchFilter?.value || '');
+  const searchTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setSearchValue(searchFilter?.value || '');
+  }, [searchFilter?.value]);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) {
+        window.clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+
+    if (!searchFilter) return;
+
+    if (searchTimerRef.current) {
+      window.clearTimeout(searchTimerRef.current);
+    }
+
+    searchTimerRef.current = window.setTimeout(() => {
+      searchFilter.onChange(value.trim() || undefined);
+    }, 300);
+  };
+
   return (
     <Flex vertical gap="middle" className="head-controller-sticky">
       <Flex justify="space-between" gap="middle" align="center" wrap={false}>
@@ -71,14 +102,15 @@ export function HeadController({
             <Input
               allowClear
               prefix={<Icon name="SearchOutlined" />}
-              value={searchFilter.value}
+              value={searchValue}
               placeholder={searchFilter.placeholder || 'Поиск'}
               className={searchFilter.className}
               style={{
-                minWidth: searchFilter.minWidth || 250,
+                borderRadius: token.borderRadius,
                 width: searchFilter.minWidth || 250,
+                minWidth: searchFilter.minWidth || 250,
               }}
-              onChange={(event) => searchFilter.onChange(event.target.value || undefined)}
+              onChange={(event) => handleSearchChange(event.target.value)}
             />
           )}
 

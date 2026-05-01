@@ -70,6 +70,7 @@ const TaskList = ({
               handleDelete={() => confirmDeleteTask(task.id)}
               handleArchive={() => handleArchive(task.id, !task.isArchived)}
               handleComplete={() => handleComplete(task.id, !task.isCompleted)}
+              completeTooltip={isActiveList ? 'Завершить задачу' : 'Вернуть в активные'}
             />
           ))}
         </Flex>

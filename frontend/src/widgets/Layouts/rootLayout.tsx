@@ -2,7 +2,7 @@ import 'dayjs/locale/ru';
 import dayjs from 'dayjs';
 import Sidebar from '../Sidebar';
 import { Flex, Layout } from 'antd';
-import Header from '@/widgets/Header';
+// import Header from '@/widgets/Header';
 import { useState, type ReactNode } from 'react';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 
@@ -13,20 +13,37 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Layout style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Header collapsed={collapsed} />
+    <Layout
+      style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: token.colorBgContainer,
+      }}
+    >
+      {/* <Header collapsed={collapsed} /> */}
       <Flex flex={1} style={{ minHeight: 0 }}>
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <Layout style={{ minWidth: 0, minHeight: 0 }}>
+        <Layout
+          style={{
+            minWidth: 0,
+            minHeight: 0,
+            margin: token.marginXS,
+            marginLeft: 0,
+            background: token.colorBgBase,
+            borderRadius: token.borderRadiusLG,
+          }}
+        >
           <Layout.Content
             className="main-scroll"
             style={{
               minHeight: 280,
-              margin: token.marginMD,
               marginRight: 0,
-              paddingRight: token.marginMD,
-              overflowX: 'hidden',
               overflowY: 'auto',
+              overflowX: 'hidden',
+              margin: token.marginMD,
+              paddingRight: token.marginMD / 2,
+              marginInlineEnd: token.marginMD / 2,
             }}
           >
             {children}

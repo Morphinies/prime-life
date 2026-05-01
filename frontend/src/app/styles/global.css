@@ -21,21 +21,6 @@ html:has(._preloader) {
   overflow: hidden;
 }
 
-.sidebar-corner {
-  top: 0;
-  left: 100%;
-  z-index: 2;
-  width: 16px;
-  height: 16px;
-  position: absolute;
-  background: var(--ant-layout-light-trigger-bg);
-  mask: radial-gradient(
-    circle at 100% 100%,
-    transparent 16px,
-    var(--ant-layout-light-trigger-bg) 16px
-  );
-}
-
 .container {
   width: 100%;
 }
@@ -92,4 +77,14 @@ html:has(._preloader) {
   color: var(--ant-color-primary);
   background: var(--ant-color-primary-bg) !important;
   border-color: var(--ant-color-primary-border) !important;
+}
+
+.task-card-row:hover .task-card-title {
+  color: var(--ant-color-primary);
+  transition: color 0.15s ease;
+}
+
+.task-card-row .ant-checkbox-wrapper:hover .ant-checkbox-inner,
+.task-card-row .ant-checkbox-wrapper:hover .ant-checkbox-checked .ant-checkbox-inner {
+  border-color: var(--ant-color-primary);
 }

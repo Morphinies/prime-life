@@ -7,7 +7,7 @@ import { COLORS, type Color } from '@/shared/config/colors';
 import ActionMenu from '@/shared/ui/ActionMenu';
 import type { CheckboxProps } from 'antd/lib/checkbox';
 import type { Task, TaskPriority } from '@/entities/task';
-import { Checkbox, Divider, Flex, Tag, Typography } from 'antd';
+import { Checkbox, Divider, Flex, Tag, Tooltip, Typography } from 'antd';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 
 const { Title, Text } = Typography;
@@ -25,6 +25,7 @@ export type TaskProps = CheckboxProps &
     handleDelete?: () => void;
     handleArchive?: () => void;
     handleComplete?: () => void;
+    completeTooltip?: string;
     withBottomDivider?: boolean;
     withDoneStateDecoration?: boolean;
   };
@@ -87,6 +88,7 @@ export default function TaskCard({
   handleDelete,
   handleArchive,
   handleComplete,
+  completeTooltip,
   ...rest
 }: TaskProps) {
   const sortable = withSort ? useSortable({ id }) : undefined;
@@ -95,26 +97,35 @@ export default function TaskCard({
     disabled: rest.disabled,
   };
   const isDoneOrArchived = withDoneStateDecoration && (isCompleted || isArchived);
+  const completeTitle =
+    completeTooltip || (isCompleted ? 'Вернуть в активные' : 'Завершить задачу');
 
   return (
     <SortableItem id={id} isOff={!withSort} sortable={sortable}>
-      <Flex gap="small" align="flex-start">
-        <ClientOnly fallback={<TaskCheckboxFallback checked={isCompleted} {...checkboxProps} />}>
-          <Checkbox
-            {...rest}
-            checked={isCompleted}
-            onChange={(e) => {
-              e.stopPropagation();
-              handleComplete?.();
-            }}
-            onClick={(e) => e.stopPropagation()}
-            styles={{
-              label: { width: '100%', display: 'flex' },
-              icon: { alignSelf: 'flex-start', marginTop: '0.3em' },
-            }}
-          ></Checkbox>
-        </ClientOnly>
+      <Flex className="task-card-row" gap="small" align="flex-start">
+        <Tooltip title={completeTitle} mouseEnterDelay={1} mouseLeaveDelay={0.1}>
+          <span>
+            <ClientOnly
+              fallback={<TaskCheckboxFallback checked={isCompleted} {...checkboxProps} />}
+            >
+              <Checkbox
+                {...rest}
+                checked={isCompleted}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleComplete?.();
+                }}
+                onClick={(e) => e.stopPropagation()}
+                styles={{
+                  label: { width: '100%', display: 'flex' },
+                  icon: { alignSelf: 'flex-start', marginTop: '0.3em' },
+                }}
+              ></Checkbox>
+            </ClientOnly>
+          </span>
+        </Tooltip>
         <Flex
+          className="task-card-body"
           flex={1}
           align="flex-start"
           onClick={handleEdit}
@@ -128,7 +139,7 @@ export default function TaskCard({
             gap="small"
             style={{ textDecoration: isDoneOrArchived ? 'line-through' : undefined }}
           >
-            {title && <Title level={5} children={title} />}
+            {title && <Title className="task-card-title" level={5} children={title} />}
 
             {description && <Text type="secondary" children={description} />}
 

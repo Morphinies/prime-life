@@ -175,6 +175,7 @@ const TasksSections = ({
                             handleDelete={() => confirmDeleteTask(task.id)}
                             handleArchive={() => handleTaskArchive(task.id, !task.isArchived)}
                             handleComplete={() => handleTaskComplete(task.id, !task.isCompleted)}
+                            completeTooltip="Завершить задачу"
                           />
                         ))}
                       </Flex>

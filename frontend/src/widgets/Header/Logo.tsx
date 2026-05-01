@@ -22,6 +22,8 @@ const Logo = ({ collapsed }: LogoProps) => {
         style={{
           width: collapsed ? 80 : 200,
           paddingLeft: token.paddingLG,
+          // width: collapsed ? 48 : 200,
+          // paddingLeft: collapsed ? token.paddingSM : token.paddingLG,
           transition: `width ${token.motionDurationMid} ${token.motionEaseInOut}`,
         }}
       >

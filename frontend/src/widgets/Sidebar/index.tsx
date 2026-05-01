@@ -2,10 +2,12 @@ import Icon from '@/shared/ui/Icon';
 import { Link } from 'react-router';
 import { useLocation } from 'react-router';
 import content from '@/shared/content/common';
-import { Avatar, Flex, Layout, Menu, Typography } from 'antd';
+import Logo from '@/widgets/Header/Logo';
+import { Avatar, Button, Flex, Layout, Menu, Tooltip, Typography } from 'antd';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import { useEffect, useState } from 'react';
 import type { MenuProps } from 'antd/lib/menu';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -28,14 +30,48 @@ const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
   return (
     <Layout.Sider
       collapsible
+      trigger={null}
+      collapsedWidth={80}
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
       style={{
         background: token.colorBgContainer,
       }}
     >
-      <div className="sidebar-corner"></div>
       <Flex vertical={true} style={{ height: '100%' }}>
+        <Flex
+          align="center"
+          justify="space-between"
+          style={{
+            position: 'relative',
+            minHeight: 56,
+            paddingBlock: token.paddingXS,
+          }}
+        >
+          <Logo collapsed={collapsed} />
+
+          <Tooltip title={collapsed ? 'Развернуть меню' : 'Свернуть меню'} placement="right">
+            <Button
+              onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
+              style={{
+                flexShrink: 0,
+                position: 'absolute',
+                top: token.paddingXS,
+                bottom: token.paddingXS,
+                left: 0,
+                padding: 0,
+                width: '10px',
+                borderLeft: 0,
+                borderRadius: 0,
+                borderTopRightRadius: token.borderRadius,
+                borderBottomRightRadius: token.borderRadius,
+                height: `calc(100% - 2 * ${token.paddingXS}px)`,
+              }}
+            />
+          </Tooltip>
+        </Flex>
+
         <Menu
           mode="inline"
           items={menuItems}
@@ -51,8 +87,7 @@ const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
             style={{
               marginTop: 'auto',
               alignItems: 'center',
-              padding: token.paddingXS,
-              paddingInline: token.paddingLG,
+              padding: `${token.padding}px ${token.paddingLG}px`,
             }}
           >
             <Avatar style={{ flexShrink: 0 }} icon={<Icon name="UserOutlined" />} />
