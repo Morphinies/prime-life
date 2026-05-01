@@ -28,14 +28,22 @@ export class ProjectsRepository {
   }
 
   async findAll(filters: ProjectListFilters): Promise<Project[]> {
+    const { project, search, status } = filters;
     const conditions: string[] = [];
     const values: unknown[] = [];
 
-    conditions.push(filters.status === 'archived' ? 'is_archived = true' : 'is_archived = false');
+    conditions.push(status === 'archived' ? 'is_archived = true' : 'is_archived = false');
 
-    if (filters.project) {
-      values.push(filters.project);
+    if (project) {
+      values.push(project);
       conditions.push(`title = $${values.length}`);
+    }
+
+    if (search) {
+      values.push(`%${search}%`);
+      conditions.push(
+        `(title ILIKE $${values.length} OR COALESCE(description, '') ILIKE $${values.length})`
+      );
     }
 
     const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';

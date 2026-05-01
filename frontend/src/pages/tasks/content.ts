@@ -7,13 +7,13 @@ const content: {
 } = {
   headController: {
     periodFilters: [
-      { label: 'Все', value: 'all' },
       { label: 'Сегодня', value: 'day' },
       { label: 'Неделя', value: 'week' },
       { label: 'Месяц', value: 'month' },
+      { label: 'Год', value: 'year' },
     ],
-    extraFilters: [
-      { label: 'Просроченные', value: 'overdue' },
+    statusFilters: [
+      { label: 'Активные', value: 'active' },
       { label: 'Завершённые', value: 'completed' },
       { label: 'Архив', value: 'archived' },
     ],

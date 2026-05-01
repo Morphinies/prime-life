@@ -8,7 +8,7 @@ import { apiClient } from '@/shared/api/axios-instance';
 import type { StatusResponse } from '@/shared/api/types';
 import { API_ENDPOINTS } from '@/shared/config/api-endpoints';
 
-type ProjectListRequestFilters = Pick<ProjectListFilters, 'project' | 'status'>;
+type ProjectListRequestFilters = Pick<ProjectListFilters, 'project' | 'search' | 'status'>;
 
 export const projectApi = {
   getList: (filters?: ProjectListRequestFilters) =>

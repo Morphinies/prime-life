@@ -20,7 +20,10 @@ type ReorderTasksContext = {
   previousTask?: Task;
 };
 
-type TaskListRequestFilters = Pick<TaskListFilters, 'period' | 'project'>;
+type TaskListRequestFilters = Pick<
+  TaskListFilters,
+  'period' | 'dateFrom' | 'dateTo' | 'search' | 'status' | 'project'
+>;
 
 const getReorderData = ({ list, oldIndex, newIndex }: ReorderTasksParams): ReorderTasksResult => {
   if (oldIndex === newIndex) {

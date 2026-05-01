@@ -15,5 +15,6 @@ export type ProjectEdit = Partial<Project>;
 export type ProjectListFilters = {
   view: ProjectListView;
   status: ProjectListStatus;
+  search?: string;
   project?: string;
 };

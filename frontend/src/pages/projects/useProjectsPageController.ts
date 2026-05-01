@@ -83,13 +83,13 @@ export function useProjectsPageController({
     initialData: defaultProjects,
   });
   const { data: tasks = defaultTasks } = useTaskList(
-    { period: 'all', project: filters.project },
+    { status: 'active', project: filters.project },
     {
       initialData: defaultTasks,
     }
   );
   const { data: allTasks = defaultAllTasks } = useTaskList(
-    { period: 'all' },
+    { status: 'active' },
     {
       initialData: defaultAllTasks,
     }

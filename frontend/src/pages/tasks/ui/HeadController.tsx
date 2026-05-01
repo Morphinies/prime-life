@@ -1,13 +1,22 @@
-import type { TaskListFilters, TaskListPeriod, TaskListView } from '@/entities/task';
+import type {
+  TaskListFilters,
+  TaskListPeriod,
+  TaskListStatus,
+  TaskListView,
+} from '@/entities/task';
+import { DatePicker } from 'antd';
+import dayjs, { type Dayjs } from 'dayjs';
 import {
   HeadController as SharedHeadController,
   type HeadControllerOption,
 } from '@/shared/ui/HeadController';
 
+const SHOW_CUSTOM_PERIOD_FILTER = false;
+
 export interface HeadControllerConfigProps {
   title: string;
   periodFilters: HeadControllerOption[];
-  extraFilters: HeadControllerOption[];
+  statusFilters: HeadControllerOption[];
   projectFilters: HeadControllerOption[];
   viewSettings: HeadControllerOption[];
 }
@@ -22,13 +31,16 @@ const HeadController = ({
   filters,
   title,
   periodFilters,
-  extraFilters,
+  statusFilters,
   projectFilters,
   viewSettings,
   onAddTask,
   onFiltersChange,
 }: HeadControllerProps) => {
-  const activeExtraFilter = extraFilters.find(({ value }) => value === filters.period);
+  const dateRangeValue =
+    filters.dateFrom && filters.dateTo
+      ? ([dayjs(filters.dateFrom), dayjs(filters.dateTo)] as [Dayjs, Dayjs])
+      : null;
 
   return (
     <SharedHeadController
@@ -37,27 +49,60 @@ const HeadController = ({
         label: '+ Добавить задачу',
         onClick: onAddTask,
       }}
-      buttonFilters={periodFilters.map((filter) => ({
-        ...filter,
-        active: filters.period === (filter.value as TaskListPeriod),
-        onClick: () => onFiltersChange({ ...filters, period: filter.value as TaskListPeriod }),
-      }))}
-      extraFilter={{
-        value: activeExtraFilter?.value,
-        placeholder: 'Ещё',
-        className: activeExtraFilter
-          ? 'tasks-more-filter tasks-more-filter-active'
-          : 'tasks-more-filter',
-        options: extraFilters,
-        onChange: (period) => onFiltersChange({ ...filters, period: period as TaskListPeriod }),
+      searchFilter={{
+        value: filters.search,
+        placeholder: 'Поиск',
+        onChange: (search) => onFiltersChange({ ...filters, search }),
       }}
-      projectFilter={{
-        allowClear: true,
-        value: filters.project,
-        placeholder: 'Проект',
-        options: projectFilters,
-        onChange: (project) => onFiltersChange({ ...filters, project }),
-      }}
+      leftSelectFilters={[
+        {
+          allowClear: true,
+          value: filters.period,
+          placeholder: 'Период',
+          options: periodFilters,
+          onChange: (period) =>
+            onFiltersChange({
+              ...filters,
+              period: period as TaskListPeriod | undefined,
+              dateFrom: undefined,
+              dateTo: undefined,
+            }),
+        },
+        {
+          value: filters.status,
+          placeholder: 'Статус',
+          options: statusFilters,
+          onChange: (status) => onFiltersChange({ ...filters, status: status as TaskListStatus }),
+        },
+        {
+          allowClear: true,
+          value: filters.project,
+          placeholder: 'Проект',
+          minWidth: 180,
+          options: projectFilters,
+          onChange: (project) => onFiltersChange({ ...filters, project }),
+        },
+      ]}
+      leftControls={
+        SHOW_CUSTOM_PERIOD_FILTER
+          ? [
+              <DatePicker.RangePicker
+                allowClear
+                value={dateRangeValue}
+                format="DD.MM.YYYY"
+                placeholder={['С даты', 'По дату']}
+                onChange={(dates) =>
+                  onFiltersChange({
+                    ...filters,
+                    period: undefined,
+                    dateFrom: dates?.[0]?.format('YYYY-MM-DD'),
+                    dateTo: dates?.[1]?.format('YYYY-MM-DD'),
+                  })
+                }
+              />,
+            ]
+          : []
+      }
       viewSelect={{
         value: filters.view,
         options: viewSettings,

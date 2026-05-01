@@ -42,14 +42,15 @@ export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData>
   const [projectListResp, allProjectsResp, taskListResp, allTaskListResp] = await Promise.all([
     projectApi.getList({
       status: filters.status,
+      search: filters.search,
       project: filters.project,
     }),
     projectApi.getList(),
     taskApi.getList({
-      period: 'all',
+      status: 'active',
       project: filters.project,
     }),
-    taskApi.getList({ period: 'all' }),
+    taskApi.getList({ status: 'active' }),
   ]);
 
   return {
@@ -96,6 +97,12 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
       nextSearchParams.delete('project');
     } else {
       nextSearchParams.set('project', nextFilters.project);
+    }
+
+    if (!nextFilters.search) {
+      nextSearchParams.delete('search');
+    } else {
+      nextSearchParams.set('search', nextFilters.search);
     }
 
     if (nextFilters.status === DEFAULT_PROJECT_LIST_FILTERS.status) {

@@ -9,7 +9,7 @@ import type {
 } from '../model/types';
 import { taskKeys } from '@/entities/task';
 
-type ProjectListRequestFilters = Pick<ProjectListFilters, 'project' | 'status'>;
+type ProjectListRequestFilters = Pick<ProjectListFilters, 'project' | 'search' | 'status'>;
 
 export const projectKeys = {
   all: ['projects'] as const,

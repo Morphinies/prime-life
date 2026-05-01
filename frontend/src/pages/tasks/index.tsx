@@ -42,6 +42,10 @@ export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData>
   const [taskListResp, allProjectsResp] = await Promise.all([
     taskApi.getList({
       period: filters.period,
+      dateFrom: filters.dateFrom,
+      dateTo: filters.dateTo,
+      search: filters.search,
+      status: filters.status,
       project: filters.project,
     }),
     projectApi.getList(),
@@ -78,10 +82,34 @@ export default function Tasks({ loaderData }: Route.ComponentProps) {
   const handleFiltersChange = (nextFilters: TaskListFilters) => {
     const nextSearchParams = new URLSearchParams(searchParams);
 
-    if (nextFilters.period === DEFAULT_TASK_LIST_FILTERS.period) {
+    if (!nextFilters.period) {
       nextSearchParams.delete('period');
     } else {
       nextSearchParams.set('period', nextFilters.period);
+    }
+
+    if (!nextFilters.dateFrom) {
+      nextSearchParams.delete('dateFrom');
+    } else {
+      nextSearchParams.set('dateFrom', nextFilters.dateFrom);
+    }
+
+    if (!nextFilters.dateTo) {
+      nextSearchParams.delete('dateTo');
+    } else {
+      nextSearchParams.set('dateTo', nextFilters.dateTo);
+    }
+
+    if (!nextFilters.search) {
+      nextSearchParams.delete('search');
+    } else {
+      nextSearchParams.set('search', nextFilters.search);
+    }
+
+    if (nextFilters.status === DEFAULT_TASK_LIST_FILTERS.status) {
+      nextSearchParams.delete('status');
+    } else {
+      nextSearchParams.set('status', nextFilters.status);
     }
 
     if (nextFilters.view === DEFAULT_TASK_LIST_FILTERS.view) {

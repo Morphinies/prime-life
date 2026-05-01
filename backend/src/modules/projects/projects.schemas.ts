@@ -3,6 +3,7 @@ import z from 'zod';
 
 export const projectListFiltersSchema = z.object({
   project: z.string().optional(),
+  search: z.string().optional(),
   status: z.enum(['active', 'archived']).optional().default('active'),
 });
 

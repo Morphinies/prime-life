@@ -70,6 +70,7 @@ const TasksSections = ({
     defaultAllTasks,
     defaultProjects,
   });
+  const [modal, contextHolder] = Modal.useModal();
 
   const isEmpty = useMemo(() => projects.length === 0, [projects.length]);
 
@@ -80,8 +81,8 @@ const TasksSections = ({
     }
   }, [createProjectSignal, showModal]);
 
-  const confirmDelete = (projectId: string) => {
-    Modal.confirm({
+  const confirmDeleteProject = (projectId: string) => {
+    modal.confirm({
       title: 'Удалить проект?',
       content: 'Все задачи проекта будут также удалены безвозвратно.',
       okText: 'Удалить',
@@ -91,8 +92,21 @@ const TasksSections = ({
     });
   };
 
+  const confirmDeleteTask = (taskId: Task['id']) => {
+    modal.confirm({
+      title: 'Удалить задачу?',
+      content: 'Задача будет удалена безвозвратно.',
+      okText: 'Удалить',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk: () => handleTaskDelete(taskId),
+    });
+  };
+
   return (
     <Flex vertical gap="large">
+      {contextHolder}
+
       {isEmpty ? (
         <Empty description="Проектов пока нет" />
       ) : (
@@ -115,7 +129,7 @@ const TasksSections = ({
                   archiveLabel={project.isArchived ? 'Разархивировать' : 'Архивировать'}
                   onEdit={() => showModal(project)}
                   onArchive={() => handleArchive(project.id, !project.isArchived)}
-                  onDelete={() => confirmDelete(project.id)}
+                  onDelete={() => confirmDeleteProject(project.id)}
                 />
               }
               title={<Title level={4}>{project.title}</Title>}
@@ -158,7 +172,7 @@ const TasksSections = ({
                             key={task.id}
                             withBottomDivider={taskIndex < section.tasks.length - 1}
                             handleEdit={() => showTaskModal(task)}
-                            handleDelete={() => handleTaskDelete(task.id)}
+                            handleDelete={() => confirmDeleteTask(task.id)}
                             handleArchive={() => handleTaskArchive(task.id, !task.isArchived)}
                             handleComplete={() => handleTaskComplete(task.id, !task.isCompleted)}
                           />
@@ -201,7 +215,7 @@ const TasksSections = ({
         }}
         handleDelete={(project) => {
           if (!project.id) return;
-          confirmDelete(project.id);
+          confirmDeleteProject(project.id);
           hideModal();
         }}
         handleSubmit={handleSubmit}
@@ -223,7 +237,7 @@ const TasksSections = ({
         }}
         handleDelete={(task) => {
           if (!task.id) return;
-          handleTaskDelete(task.id);
+          confirmDeleteTask(task.id);
           hideTaskModal();
         }}
         handleSubmit={handleTaskSubmit}

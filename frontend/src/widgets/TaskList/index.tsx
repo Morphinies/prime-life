@@ -1,4 +1,4 @@
-import { Flex } from 'antd';
+import { Flex, Modal } from 'antd';
 import { useEffect, useRef } from 'react';
 import { type Task, type TaskListFilters } from '@/entities/task';
 import TaskCard from '@/entities/task/ui/TaskCard';
@@ -19,7 +19,7 @@ const TaskList = ({
   createTaskSignal = 0,
   modalTask,
 }: TaskListProps) => {
-  const isActiveList = filters.period !== 'completed' && filters.period !== 'archived';
+  const isActiveList = filters.status === 'active';
   const handledCreateTaskSignal = useRef(createTaskSignal);
   const {
     taskEdit,
@@ -33,6 +33,7 @@ const TaskList = ({
     handleComplete,
     modalTaskError,
   } = useTaskListController({ defaultList, filters });
+  const [modal, contextHolder] = Modal.useModal();
 
   useEffect(() => {
     if (createTaskSignal > handledCreateTaskSignal.current) {
@@ -41,8 +42,21 @@ const TaskList = ({
     }
   }, [createTaskSignal, showModal]);
 
+  const confirmDeleteTask = (taskId: Task['id']) => {
+    modal.confirm({
+      title: 'Удалить задачу?',
+      content: 'Задача будет удалена безвозвратно.',
+      okText: 'Удалить',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk: () => handleDelete(taskId),
+    });
+  };
+
   return (
     <Flex vertical gap="large">
+      {contextHolder}
+
       <SortContext list={filteredList} handleReorder={handleReorder}>
         <Flex vertical>
           {filteredList.map((task) => (
@@ -53,7 +67,7 @@ const TaskList = ({
               withBottomDivider={true}
               withDoneStateDecoration={isActiveList}
               handleEdit={() => showModal(task)}
-              handleDelete={() => handleDelete(task.id)}
+              handleDelete={() => confirmDeleteTask(task.id)}
               handleArchive={() => handleArchive(task.id, !task.isArchived)}
               handleComplete={() => handleComplete(task.id, !task.isCompleted)}
             />
@@ -76,7 +90,7 @@ const TaskList = ({
         }}
         handleDelete={(task) => {
           if (!task.id) return;
-          handleDelete(task.id);
+          confirmDeleteTask(task.id);
           hideModal();
         }}
         handleSubmit={handleSubmit}

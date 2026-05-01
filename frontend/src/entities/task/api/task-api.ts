@@ -3,7 +3,10 @@ import { apiClient } from '@/shared/api/axios-instance';
 import type { StatusResponse } from '@/shared/api/types';
 import { API_ENDPOINTS } from '@/shared/config/api-endpoints';
 
-type TaskListRequestFilters = Pick<TaskListFilters, 'period' | 'project'>;
+type TaskListRequestFilters = Pick<
+  TaskListFilters,
+  'period' | 'dateFrom' | 'dateTo' | 'search' | 'status' | 'project'
+>;
 
 export const taskApi = {
   getList: (filters?: TaskListRequestFilters) =>

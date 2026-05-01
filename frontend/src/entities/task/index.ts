@@ -6,6 +6,7 @@ export type {
   TaskEdit,
   TaskListFilters,
   TaskListPeriod,
+  TaskListStatus,
   TaskListView,
 } from './model/types';
 

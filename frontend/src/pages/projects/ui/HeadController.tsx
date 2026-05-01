@@ -37,18 +37,28 @@ const HeadController = ({
             }
           : undefined
       }
-      buttonFilters={statusFilters.map((filter) => ({
-        ...filter,
-        active: filters.status === (filter.value as ProjectListStatus),
-        onClick: () => onFiltersChange({ ...filters, status: filter.value as ProjectListStatus }),
-      }))}
-      projectFilter={{
-        allowClear: true,
-        value: filters.project,
-        placeholder: 'Проект',
-        options: projectFilters,
-        onChange: (project) => onFiltersChange({ ...filters, project }),
+      searchFilter={{
+        value: filters.search,
+        placeholder: 'Поиск',
+        onChange: (search) => onFiltersChange({ ...filters, search }),
       }}
+      leftSelectFilters={[
+        {
+          value: filters.status,
+          placeholder: 'Статус',
+          options: statusFilters,
+          onChange: (status) =>
+            onFiltersChange({ ...filters, status: status as ProjectListStatus }),
+        },
+        {
+          allowClear: true,
+          value: filters.project,
+          placeholder: 'Проект',
+          minWidth: 180,
+          options: projectFilters,
+          onChange: (project) => onFiltersChange({ ...filters, project }),
+        },
+      ]}
       viewSelect={{
         value: filters.view,
         options: viewSettings,

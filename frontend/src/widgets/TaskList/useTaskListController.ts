@@ -24,15 +24,15 @@ function wait(ms: number) {
 }
 
 function isActiveTaskList(filters: TaskListProps['filters']) {
-  return filters.period !== 'completed' && filters.period !== 'archived';
+  return filters.status === 'active';
 }
 
 function shouldKeepTaskInCurrentList(task: Task, filters: TaskListProps['filters']) {
-  if (filters.period === 'completed') {
+  if (filters.status === 'completed') {
     return !!task.isCompleted && !task.isArchived;
   }
 
-  if (filters.period === 'archived') {
+  if (filters.status === 'archived') {
     return !!task.isArchived;
   }
 
@@ -61,7 +61,14 @@ export function useTaskListController({ filters, defaultList = [] }: UseTaskList
     deleteTask.error?.message ||
     reorderTasks.error?.message;
 
-  const queryFilters = { period: filters.period, project: filters.project };
+  const queryFilters = {
+    period: filters.period,
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
+    search: filters.search,
+    status: filters.status,
+    project: filters.project,
+  };
   const { data: list = defaultList } = useTaskList(queryFilters, {
     initialData: defaultList,
   });
@@ -81,7 +88,15 @@ export function useTaskListController({ filters, defaultList = [] }: UseTaskList
     if (delayedRemovalCount.current > 0) return;
 
     setListState(list);
-  }, [list, filters.period, filters.project]);
+  }, [
+    list,
+    filters.period,
+    filters.dateFrom,
+    filters.dateTo,
+    filters.search,
+    filters.status,
+    filters.project,
+  ]);
 
   const [defaultTask] = useState<UpdateTaskDto>({
     title: '',

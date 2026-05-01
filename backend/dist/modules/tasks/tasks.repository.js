@@ -28,36 +28,42 @@ class TasksRepository {
         };
     }
     async findAll(filters) {
-        const { period, project } = filters;
+        const { dateFrom, dateTo, period, project, search, status } = filters;
         const whereByPeriod = {
             day: "deadline >= date_trunc('day', CURRENT_TIMESTAMP) AND deadline < date_trunc('day', CURRENT_TIMESTAMP) + interval '1 day'",
             week: "deadline >= date_trunc('week', CURRENT_TIMESTAMP) AND deadline < date_trunc('week', CURRENT_TIMESTAMP) + interval '1 week'",
             month: "deadline >= date_trunc('month', CURRENT_TIMESTAMP) AND deadline < date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month'",
-            overdue: "deadline IS NOT NULL AND deadline < date_trunc('day', CURRENT_TIMESTAMP)",
-            completed: 'is_completed = true AND is_archived = false',
-            archived: 'is_archived = true',
+            year: "deadline >= date_trunc('year', CURRENT_TIMESTAMP) AND deadline < date_trunc('year', CURRENT_TIMESTAMP) + interval '1 year'",
         };
         const conditions = [];
         const values = [];
-        if (period === 'completed') {
-            conditions.push(whereByPeriod.completed);
+        if (status === 'completed') {
+            conditions.push('is_completed = true');
+            conditions.push('is_archived = false');
         }
-        else if (period === 'archived') {
-            conditions.push(whereByPeriod.archived);
+        else if (status === 'archived') {
+            conditions.push('is_archived = true');
         }
         else {
             conditions.push('is_completed = false');
             conditions.push('is_archived = false');
-            if (period === 'overdue') {
-                conditions.push(whereByPeriod.overdue);
-            }
-            else if (period !== 'all') {
-                conditions.push(`deadline IS NOT NULL AND ${whereByPeriod[period]}`);
-            }
+        }
+        if (period) {
+            conditions.push(`deadline IS NOT NULL AND ${whereByPeriod[period]}`);
+        }
+        if (!period && dateFrom && dateTo) {
+            values.push(dateFrom);
+            conditions.push(`deadline >= $${values.length}`);
+            values.push(dateTo);
+            conditions.push(`deadline < $${values.length}::timestamp + interval '1 day'`);
         }
         if (project) {
             values.push(project);
             conditions.push(`project = $${values.length}`);
+        }
+        if (search) {
+            values.push(`%${search}%`);
+            conditions.push(`(title ILIKE $${values.length} OR COALESCE(description, '') ILIKE $${values.length} OR COALESCE(section, '') ILIKE $${values.length} OR COALESCE(project, '') ILIKE $${values.length})`);
         }
         const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
         const result = await postgres_config_1.default.query(`SELECT * FROM tasks ${whereClause} ORDER BY sort_order DESC`, values);

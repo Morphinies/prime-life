@@ -1,12 +1,6 @@
 export type TaskPriority = 'high' | 'medium' | 'low';
-export type TaskListPeriod =
-  | 'day'
-  | 'week'
-  | 'month'
-  | 'overdue'
-  | 'completed'
-  | 'archived'
-  | 'all';
+export type TaskListPeriod = 'day' | 'week' | 'month' | 'year';
+export type TaskListStatus = 'active' | 'completed' | 'archived';
 export type TaskListView = 'list';
 
 export type Task = {
@@ -28,7 +22,11 @@ export type UpdateTaskDto = Partial<Task>;
 export type TaskEdit = Partial<Task>;
 
 export type TaskListFilters = {
-  period: TaskListPeriod;
+  period?: TaskListPeriod;
+  dateFrom?: string;
+  dateTo?: string;
+  status: TaskListStatus;
   view: TaskListView;
+  search?: string;
   project?: string;
 };

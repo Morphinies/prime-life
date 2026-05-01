@@ -1,4 +1,5 @@
-import { Button, Flex, Select, Typography } from 'antd';
+import { Button, Flex, Input, Select, Typography } from 'antd';
+import type { ReactNode } from 'react';
 import Icon, { type IconName } from '@/shared/ui/Icon';
 
 const { Title } = Typography;
@@ -35,27 +36,74 @@ export type HeadControllerAction = {
   onClick: () => void;
 };
 
+export type HeadControllerSearchFilter = {
+  className?: string;
+  minWidth?: number;
+  placeholder?: string;
+  value?: string;
+  onChange: (value?: string) => void;
+};
+
 export interface HeadControllerProps {
   title: string;
   titleAction?: HeadControllerAction;
-  buttonFilters: HeadControllerButtonFilter[];
-  extraFilter?: HeadControllerSelectFilter;
-  projectFilter?: HeadControllerSelectFilter;
+  buttonFilters?: HeadControllerButtonFilter[];
+  searchFilter?: HeadControllerSearchFilter;
+  leftControls?: ReactNode[];
+  leftSelectFilters?: HeadControllerSelectFilter[];
   viewSelect: HeadControllerViewSelect;
 }
 
 export function HeadController({
   title,
   titleAction,
-  buttonFilters,
-  extraFilter,
-  projectFilter,
+  buttonFilters = [],
+  searchFilter,
+  leftControls = [],
+  leftSelectFilters = [],
   viewSelect,
 }: HeadControllerProps) {
   return (
     <Flex vertical gap="middle" className="head-controller-sticky">
-      <Flex justify="space-between" gap="middle" wrap>
-        <Flex gap="small" wrap>
+      <Flex justify="space-between" gap="middle" align="center" wrap={false}>
+        <Flex gap="small" wrap={false} style={{ minWidth: 0, overflowX: 'auto' }}>
+          {searchFilter && (
+            <Input
+              allowClear
+              prefix={<Icon name="SearchOutlined" />}
+              value={searchFilter.value}
+              placeholder={searchFilter.placeholder || 'Поиск'}
+              className={searchFilter.className}
+              style={{
+                minWidth: searchFilter.minWidth || 250,
+                width: searchFilter.minWidth || 250,
+              }}
+              onChange={(event) => searchFilter.onChange(event.target.value || undefined)}
+            />
+          )}
+
+          {leftSelectFilters.map((filter, index) => (
+            <Select
+              key={index}
+              allowClear={filter.allowClear}
+              value={filter.value}
+              placeholder={filter.placeholder}
+              className={filter.className}
+              style={{ minWidth: filter.minWidth || 140 }}
+              placement="bottomLeft"
+              popupMatchSelectWidth={false}
+              options={filter.options.map(({ label, value }) => ({
+                label,
+                value,
+              }))}
+              onChange={filter.onChange}
+            />
+          ))}
+
+          {leftControls.map((control, index) => (
+            <div key={index}>{control}</div>
+          ))}
+
           {buttonFilters.map(({ label, value, iconName, active, onClick }) => (
             <Button
               key={value}
@@ -67,39 +115,9 @@ export function HeadController({
               {label}
             </Button>
           ))}
-
-          {extraFilter && (
-            <Select
-              value={extraFilter.value}
-              placeholder={extraFilter.placeholder}
-              className={extraFilter.className}
-              style={{ minWidth: extraFilter.minWidth || 96 }}
-              placement="bottomLeft"
-              popupMatchSelectWidth={false}
-              options={extraFilter.options.map(({ label, value }) => ({
-                label,
-                value,
-              }))}
-              onChange={extraFilter.onChange}
-            />
-          )}
         </Flex>
 
-        <Flex gap="small" wrap>
-          {projectFilter && (
-            <Select
-              allowClear={projectFilter.allowClear}
-              value={projectFilter.value}
-              placeholder={projectFilter.placeholder}
-              style={{ minWidth: projectFilter.minWidth || 180 }}
-              options={projectFilter.options.map(({ label, value }) => ({
-                label,
-                value,
-              }))}
-              onChange={projectFilter.onChange}
-            />
-          )}
-
+        <Flex gap="small" wrap={false}>
           <Select
             value={viewSelect.value}
             style={{ width: 56 }}
