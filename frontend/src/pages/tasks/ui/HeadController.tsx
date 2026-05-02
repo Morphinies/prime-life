@@ -9,6 +9,7 @@ import dayjs, { type Dayjs } from 'dayjs';
 import {
   HeadController as SharedHeadController,
   type HeadControllerOption,
+  type HeadControllerSelectFilter,
 } from '@/shared/ui/HeadController';
 
 const SHOW_CUSTOM_PERIOD_FILTER = false;
@@ -17,7 +18,7 @@ export interface HeadControllerConfigProps {
   title: string;
   periodFilters: HeadControllerOption[];
   statusFilters: HeadControllerOption[];
-  projectFilters: HeadControllerOption[];
+  projectFilters?: HeadControllerOption[];
   viewSettings: HeadControllerOption[];
 }
 
@@ -41,6 +42,18 @@ const HeadController = ({
     filters.dateFrom && filters.dateTo
       ? ([dayjs(filters.dateFrom), dayjs(filters.dateTo)] as [Dayjs, Dayjs])
       : null;
+  const projectSelectFilter: HeadControllerSelectFilter[] = projectFilters?.length
+    ? [
+        {
+          allowClear: true,
+          value: filters.project,
+          placeholder: 'Проект',
+          minWidth: 180,
+          options: projectFilters,
+          onChange: (project?: string) => onFiltersChange({ ...filters, project }),
+        },
+      ]
+    : [];
 
   return (
     <SharedHeadController
@@ -74,14 +87,7 @@ const HeadController = ({
           options: statusFilters,
           onChange: (status) => onFiltersChange({ ...filters, status: status as TaskListStatus }),
         },
-        {
-          allowClear: true,
-          value: filters.project,
-          placeholder: 'Проект',
-          minWidth: 180,
-          options: projectFilters,
-          onChange: (project) => onFiltersChange({ ...filters, project }),
-        },
+        ...projectSelectFilter,
       ]}
       leftControls={
         SHOW_CUSTOM_PERIOD_FILTER
