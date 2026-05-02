@@ -1,4 +1,5 @@
 import type { ProjectListFilters, ProjectListStatus, ProjectListView } from '@/entities/project';
+import type { ReactNode } from 'react';
 import {
   HeadController as SharedHeadController,
   type HeadControllerOption,
@@ -9,6 +10,8 @@ export interface HeadControllerConfigProps {
   statusFilters: HeadControllerOption[];
   projectFilters: HeadControllerOption[];
   viewSettings: HeadControllerOption[];
+  leftControls?: ReactNode[];
+  rightControls?: ReactNode[];
 }
 
 export interface HeadControllerProps extends HeadControllerConfigProps {
@@ -23,6 +26,8 @@ const HeadController = ({
   statusFilters,
   projectFilters,
   viewSettings,
+  leftControls,
+  rightControls,
   onAddProject,
   onFiltersChange,
 }: HeadControllerProps) => {
@@ -42,6 +47,8 @@ const HeadController = ({
         placeholder: 'Поиск',
         onChange: (search) => onFiltersChange({ ...filters, search }),
       }}
+      leftControls={leftControls}
+      rightControls={rightControls}
       leftSelectFilters={[
         {
           value: filters.status,

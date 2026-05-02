@@ -52,6 +52,7 @@ export interface HeadControllerProps {
   searchFilter?: HeadControllerSearchFilter;
   leftControls?: ReactNode[];
   leftSelectFilters?: HeadControllerSelectFilter[];
+  rightControls?: ReactNode[];
   viewSelect: HeadControllerViewSelect;
 }
 
@@ -62,6 +63,7 @@ export function HeadController({
   searchFilter,
   leftControls = [],
   leftSelectFilters = [],
+  rightControls = [],
   viewSelect,
 }: HeadControllerProps) {
   const { token } = useThemeToken();
@@ -150,6 +152,10 @@ export function HeadController({
         </Flex>
 
         <Flex gap="small" wrap={false}>
+          {rightControls.map((control, index) => (
+            <div key={index}>{control}</div>
+          ))}
+
           <Select
             value={viewSelect.value}
             style={{ width: 56 }}

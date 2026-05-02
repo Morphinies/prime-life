@@ -1,8 +1,9 @@
 import { useSearchParams } from 'react-router';
-import { Flex } from 'antd';
+import { Button, Flex, Tooltip } from 'antd';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import content from './content';
 import type { Route } from '../+types/home';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import TasksSections from './ui/TasksSections';
 import HeadController from './ui/HeadController';
 import {
@@ -64,11 +65,32 @@ export async function loader({ request }: Route.LoaderArgs): Promise<LoaderData>
 export default function Projects({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [createProjectSignal, setCreateProjectSignal] = useState(0);
+  const [collapsedProjectIds, setCollapsedProjectIds] = useState<string[]>([]);
   const { projectList, allProjects, taskList, allTaskList } = (loaderData || {}) as LoaderData;
   const { headController, modalProject, modalTask } = content;
   const filters = getProjectListFilters(searchParams);
   const title = getProjectListTitle(filters);
   const projectFilters = getProjectFilters(allProjects);
+  const isAllProjectsCollapsed = useMemo(
+    () => projectList.length > 0 && projectList.every((project) => collapsedProjectIds.includes(project.id)),
+    [collapsedProjectIds, projectList]
+  );
+
+  useEffect(() => {
+    setCollapsedProjectIds((currentIds) =>
+      currentIds.filter((projectId) => projectList.some((project) => project.id === projectId))
+    );
+  }, [projectList]);
+
+  const handleToggleAllProjects = () => {
+    if (isAllProjectsCollapsed) {
+      setCollapsedProjectIds([]);
+      return;
+    }
+
+    setCollapsedProjectIds(projectList.map((project) => project.id));
+  };
+
   const taskModal = {
     ...modalTask,
     fieldSets: modalTask.fieldSets?.map((fieldSet) => ({
@@ -120,6 +142,20 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
         {...headController}
         title={title}
         projectFilters={projectFilters}
+        rightControls={[
+          <Tooltip
+            key="toggle-projects-collapse"
+            title={isAllProjectsCollapsed ? 'Развернуть все проекты' : 'Свернуть все проекты'}
+          >
+            <Button
+              variant="filled"
+              color="default"
+              icon={isAllProjectsCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              aria-label={isAllProjectsCollapsed ? 'Развернуть все проекты' : 'Свернуть все проекты'}
+              onClick={handleToggleAllProjects}
+            />
+          </Tooltip>,
+        ]}
         filters={filters}
         onAddProject={() => setCreateProjectSignal((signal) => signal + 1)}
         onFiltersChange={handleFiltersChange}
@@ -132,6 +168,14 @@ export default function Projects({ loaderData }: Route.ComponentProps) {
         defaultTasks={taskList}
         defaultAllTasks={allTaskList}
         defaultProjects={projectList}
+        collapsedProjectIds={collapsedProjectIds}
+        onToggleProjectCollapse={(projectId) =>
+          setCollapsedProjectIds((currentIds) =>
+            currentIds.includes(projectId)
+              ? currentIds.filter((id) => id !== projectId)
+              : [...currentIds, projectId]
+          )
+        }
       />
     </Flex>
   );

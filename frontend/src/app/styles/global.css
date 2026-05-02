@@ -84,6 +84,17 @@ html:has(._preloader) {
   transition: color 0.15s ease;
 }
 
+.project-card-link:hover .project-card-title {
+  color: var(--ant-color-primary);
+  transition: color 0.15s ease;
+}
+
+.ant-breadcrumb a:hover,
+.ant-breadcrumb-link:hover,
+.ant-breadcrumb-link a:hover {
+  background: transparent !important;
+}
+
 .task-card-row .ant-checkbox-wrapper:hover .ant-checkbox-inner,
 .task-card-row .ant-checkbox-wrapper:hover .ant-checkbox-checked .ant-checkbox-inner {
   border-color: var(--ant-color-primary);

@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { HolderOutlined, DownOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Card, Empty, Flex, Modal, Typography } from 'antd';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router';
 import type { Project, ProjectListFilters } from '@/entities/project';
 import type { Task } from '@/entities/task';
@@ -22,6 +22,8 @@ export interface TasksSectionsProps {
   defaultAllTasks?: Task[];
   createProjectSignal?: number;
   defaultProjects?: Project[];
+  collapsedProjectIds: string[];
+  onToggleProjectCollapse: (projectId: string) => void;
   modalProject: Pick<ModalProjectProps, 'fields'>;
   modalTask: Pick<ModalTaskProps, 'fields' | 'fieldSets'>;
 }
@@ -115,10 +117,11 @@ function ProjectCard({
               styles={{ root: { padding: 0, width: 24, height: 24 } }}
             />
             <Link
+              className="project-card-link"
               to={`/projects/${project.id}`}
               style={{ color: 'inherit', flex: 1, minWidth: 0 }}
             >
-              <Title level={4} style={{ margin: 0 }}>
+              <Title className="project-card-title" level={4} style={{ margin: 0 }}>
                 {project.title}
               </Title>
             </Link>
@@ -160,11 +163,12 @@ const TasksSections = ({
   defaultAllTasks = [],
   createProjectSignal = 0,
   defaultProjects = [],
+  collapsedProjectIds,
+  onToggleProjectCollapse,
   modalProject,
   modalTask,
 }: TasksSectionsProps) => {
   const handledCreateProjectSignal = useRef(createProjectSignal);
-  const [collapsedProjectIds, setCollapsedProjectIds] = useState<string[]>([]);
   const {
     projectEdit,
     taskEdit,
@@ -208,14 +212,6 @@ const TasksSections = ({
     }
   }, [createProjectSignal, showModal]);
 
-  const toggleProjectCollapse = (projectId: string) => {
-    setCollapsedProjectIds((currentIds) =>
-      currentIds.includes(projectId)
-        ? currentIds.filter((id) => id !== projectId)
-        : [...currentIds, projectId]
-    );
-  };
-
   const confirmDeleteProject = (projectId: string) => {
     modal.confirm({
       title: 'Удалить проект?',
@@ -252,7 +248,7 @@ const TasksSections = ({
                 key={project.id}
                 project={project}
                 isCollapsed={collapsedProjectIds.includes(project.id)}
-                onToggleCollapse={toggleProjectCollapse}
+                onToggleCollapse={onToggleProjectCollapse}
                 onEditProject={showModal}
                 onArchiveProject={(currentProject) =>
                   handleArchive(currentProject.id, !currentProject.isArchived)
