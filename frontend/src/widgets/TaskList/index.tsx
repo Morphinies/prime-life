@@ -1,8 +1,7 @@
 import { Flex, Modal } from 'antd';
 import { useEffect, useRef } from 'react';
 import { type Task, type TaskListFilters } from '@/entities/task';
-import TaskCard from '@/entities/task/ui/TaskCard';
-import { SortContext } from '@/shared/ui/SortContext';
+import TaskSectionsList from '@/shared/ui/TaskSectionsList';
 import ModalTask, { type ModalTaskProps } from './ModalTask';
 import { useTaskListController } from './useTaskListController';
 
@@ -57,24 +56,17 @@ const TaskList = ({
     <Flex vertical gap="large">
       {contextHolder}
 
-      <SortContext list={filteredList} handleReorder={handleReorder}>
-        <Flex vertical>
-          {filteredList.map((task) => (
-            <TaskCard
-              {...task}
-              key={task.id}
-              withSort={true}
-              withBottomDivider={true}
-              withDoneStateDecoration={isActiveList}
-              handleEdit={() => showModal(task)}
-              handleDelete={() => confirmDeleteTask(task.id)}
-              handleArchive={() => handleArchive(task.id, !task.isArchived)}
-              handleComplete={() => handleComplete(task.id, !task.isCompleted)}
-              completeTooltip={isActiveList ? 'Завершить задачу' : 'Вернуть в активные'}
-            />
-          ))}
-        </Flex>
-      </SortContext>
+      <TaskSectionsList
+        tasks={filteredList}
+        withSort={true}
+        withDoneStateDecoration={isActiveList}
+        completeTooltip={isActiveList ? 'Завершить задачу' : 'Вернуть в активные'}
+        onReorder={handleReorder}
+        onEditTask={showModal}
+        onDeleteTask={(task) => confirmDeleteTask(task.id)}
+        onArchiveTask={(task) => handleArchive(task.id, !task.isArchived)}
+        onCompleteTask={(task) => handleComplete(task.id, !task.isCompleted)}
+      />
 
       <ModalTask
         taskEdit={taskEdit}

@@ -131,7 +131,9 @@ export default function TaskCard({
           onClick={handleEdit}
           justify="space-between"
           {...(sortable ? sortable.listeners : {})}
-          style={{ cursor: sortable?.isDragging ? 'grabbing' : 'pointer' }}
+          style={{
+            cursor: sortable?.isDragging ? 'grabbing' : handleEdit ? 'pointer' : 'default',
+          }}
         >
           <Flex
             vertical

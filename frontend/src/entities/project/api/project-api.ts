@@ -19,4 +19,6 @@ export const projectApi = {
     apiClient.delete<StatusResponse>(API_ENDPOINTS.projects.delete(id)),
   update: (id: Project['id'], data: UpdateProjectDto) =>
     apiClient.put<Project>(API_ENDPOINTS.projects.update(id), data),
+  move: (id: Project['id'], data: { sortOrder: number }) =>
+    apiClient.put<StatusResponse>(API_ENDPOINTS.projects.move(id), data),
 };

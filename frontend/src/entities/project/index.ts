@@ -14,6 +14,7 @@ export {
   useCreateProject,
   useDeleteProject,
   useUpdateProject,
+  useReorderProjects,
   projectKeys,
 } from './api/project-queries';
 

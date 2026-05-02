@@ -26,10 +26,16 @@ export async function initDatabase() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         title VARCHAR(100) NOT NULL UNIQUE,
         description TEXT,
+        sort_order DECIMAL(10, 4) DEFAULT 0,
         is_archived BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    await client.query(`
+      ALTER TABLE projects
+      ADD COLUMN IF NOT EXISTS sort_order DECIMAL(10, 4) DEFAULT 0
     `);
 
     await client.query(`

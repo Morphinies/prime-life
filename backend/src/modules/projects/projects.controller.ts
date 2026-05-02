@@ -7,6 +7,7 @@ import {
 } from './projects.schemas';
 import { ProjectsService } from './projects.service';
 import { RouteHandlerProps } from '@/core/router';
+import z from 'zod';
 
 export class ProjectsController {
   private projectsService: ProjectsService;
@@ -60,6 +61,15 @@ export class ProjectsController {
 
     const isDeleted = await this.projectsService.deleteProject(id);
     res.json({ success: isDeleted });
+  };
+
+  moveProject = async ({ req, res, params }: RouteHandlerProps) => {
+    const id = params?.id;
+    if (!id) return res.json({ error: 'id parameter must be specified' }, 400);
+
+    const payload = z.object({ sortOrder: z.coerce.number() }).parse(req.body);
+    await this.projectsService.moveProject(id, payload.sortOrder);
+    res.json({ success: true });
   };
 }
 

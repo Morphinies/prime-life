@@ -19,5 +19,6 @@ export const API_ENDPOINTS = {
     create: '/projects',
     update: (id: string) => `/projects/${id}`,
     delete: (id: string) => `/projects/${id}`,
+    move: (id: string) => `/projects/${id}/move`,
   },
 } as const;

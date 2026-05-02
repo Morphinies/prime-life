@@ -7,7 +7,6 @@ import { Avatar, Button, Flex, Layout, Menu, Tooltip, Typography } from 'antd';
 import { useThemeToken } from '@/shared/lib/hooks/useThemeToken';
 import { useEffect, useState } from 'react';
 import type { MenuProps } from 'antd/lib/menu';
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 

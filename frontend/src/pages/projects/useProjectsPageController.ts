@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react';
+import { arrayMove } from '@dnd-kit/sortable';
+import { useEffect, useMemo, useState } from 'react';
 import { getEditedObject } from '@/shared/utils/transformer';
 import {
   useCreateProject,
   useDeleteProject,
   useProjectList,
+  useReorderProjects,
   useUpdateProject,
   type CreateProjectDto,
   type Project,
@@ -68,6 +70,7 @@ export function useProjectsPageController({
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
+  const reorderProjects = useReorderProjects();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const createTask = useCreateTask();
@@ -78,10 +81,20 @@ export function useProjectsPageController({
   const modalTaskError =
     updateTask.error?.message || deleteTask.error?.message || createTask.error?.message;
 
-  const queryFilters = { project: filters.project, status: filters.status };
+  const queryFilters = { project: filters.project, search: filters.search, status: filters.status };
   const { data: projects = defaultProjects } = useProjectList(queryFilters, {
     initialData: defaultProjects,
   });
+  const [projectListState, setProjectListState] = useState<Project[]>(defaultProjects);
+
+  useEffect(() => {
+    setProjectListState(defaultProjects);
+  }, [defaultProjects]);
+
+  useEffect(() => {
+    setProjectListState(projects);
+  }, [projects]);
+
   const { data: tasks = defaultTasks } = useTaskList(
     { status: 'active', project: filters.project },
     {
@@ -119,13 +132,13 @@ export function useProjectsPageController({
 
   const projectsWithSections = useMemo<ProjectWithSections[]>(
     () =>
-      projects.map((project) => ({
+      projectListState.map((project) => ({
         ...project,
         sections: getProjectSections(
           tasksForSections.filter((task) => task.project === project.title)
         ),
       })),
-    [projects, tasksForSections]
+    [projectListState, tasksForSections]
   );
 
   const [defaultProject] = useState<ProjectEdit>({
@@ -162,6 +175,28 @@ export function useProjectsPageController({
       id: projectId,
       data: { isArchived },
     });
+  };
+
+  const handleProjectReorder = async (
+    list: Pick<Project, 'id' | 'sortOrder'>[],
+    oldIndex: number,
+    newIndex: number
+  ) => {
+    if (oldIndex === newIndex) return;
+
+    const previousList = projectListState;
+    setProjectListState(arrayMove(projectListState, oldIndex, newIndex));
+
+    try {
+      await reorderProjects.mutateAsync({
+        list,
+        oldIndex,
+        newIndex,
+      });
+    } catch (error) {
+      setProjectListState(previousList);
+      throw error;
+    }
   };
 
   const hideModal = () => {
@@ -310,6 +345,7 @@ export function useProjectsPageController({
     handleSubmit,
     handleDelete,
     handleArchive,
+    handleProjectReorder,
     handleAddTaskToProject,
     handleTaskSubmit,
     handleTaskComplete,

@@ -5,6 +5,7 @@ const routes: RouteConfig = [
   route('dashboard', 'pages/dashboard/index.tsx'),
   route('tasks', 'pages/tasks/index.tsx'),
   route('projects', 'pages/projects/index.tsx'),
+  route('projects/:id', 'pages/projects.$id.tsx'),
 
   // route('tasks', 'pages/tasks.tsx'),
   // route('projects', 'pages/projects.tsx'),

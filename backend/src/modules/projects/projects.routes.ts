@@ -6,6 +6,7 @@ const projectsRouter = new Router('/projects');
 projectsRouter.addRoute('GET', '/', projectsController.getAllProjects);
 projectsRouter.addRoute('GET', '/:id', projectsController.getProjectById);
 projectsRouter.addRoute('POST', '/', projectsController.createProject);
+projectsRouter.addRoute('PUT', '/:id/move', projectsController.moveProject);
 projectsRouter.addRoute('PUT', '/:id', projectsController.updateProject);
 projectsRouter.addRoute('DELETE', '/:id', projectsController.deleteProject);
 

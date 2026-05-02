@@ -15,15 +15,23 @@ export class ProjectsRepository {
       created_at: createdAt,
       updated_at: updatedAt,
       is_archived: isArchived,
+      sort_order: project.sortOrder,
     };
   }
 
-  transformProjectFromDB({ created_at, updated_at, is_archived, ...project }: ProjectDB): Project {
+  transformProjectFromDB({
+    created_at,
+    updated_at,
+    is_archived,
+    sort_order,
+    ...project
+  }: ProjectDB): Project {
     return {
       ...project,
       createdAt: created_at,
       updatedAt: updated_at,
       isArchived: is_archived,
+      sortOrder: sort_order,
     };
   }
 
@@ -49,7 +57,7 @@ export class ProjectsRepository {
     const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const result = await pool.query<ProjectDB>(
-      `SELECT * FROM projects ${whereClause} ORDER BY title ASC`,
+      `SELECT * FROM projects ${whereClause} ORDER BY sort_order DESC, created_at ASC, title ASC`,
       values
     );
 
@@ -71,11 +79,17 @@ export class ProjectsRepository {
   }
 
   async create(project: ProjectCreate): Promise<Project> {
+    const maxOrder = await pool.query<{ max: number }>(
+      'SELECT COALESCE(MAX(sort_order), -1) as max FROM projects'
+    );
+    const max = Number(maxOrder.rows[0].max);
+    const newSortOrder = max > 0 ? max + 1 : 1;
+
     const result = await pool.query<ProjectDB>(
-      `INSERT INTO projects (title, description)
-       VALUES ($1, $2)
+      `INSERT INTO projects (title, description, sort_order)
+       VALUES ($1, $2, $3)
        RETURNING *`,
-      [project.title, project.description]
+      [project.title, project.description, newSortOrder]
     );
 
     return this.transformProjectFromDB(result.rows[0]);
@@ -107,7 +121,7 @@ export class ProjectsRepository {
 
         if (value === undefined) continue;
 
-        const updateFields: (keyof Project)[] = ['title', 'description', 'isArchived'];
+        const updateFields: (keyof Project)[] = ['title', 'description', 'isArchived', 'sortOrder'];
 
         if (updateFields.includes(projectKey as keyof Project)) {
           fields.push(`${toSnakeCase(projectKey)} = $${index++}`);
@@ -142,6 +156,13 @@ export class ProjectsRepository {
     } finally {
       client.release();
     }
+  }
+
+  async moveProject(projectId: string, newSortOrder: number): Promise<void> {
+    await pool.query<ProjectDB>('UPDATE projects SET sort_order = $1 WHERE id = $2', [
+      newSortOrder,
+      projectId,
+    ]);
   }
 
   async delete(id: string): Promise<boolean> {

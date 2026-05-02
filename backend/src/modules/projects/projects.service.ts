@@ -31,4 +31,8 @@ export class ProjectsService {
   async deleteProject(id: string): Promise<boolean> {
     return this.repository.delete(id);
   }
+
+  async moveProject(projectId: string, newSortOrder: number): Promise<void> {
+    return this.repository.moveProject(projectId, newSortOrder);
+  }
 }
