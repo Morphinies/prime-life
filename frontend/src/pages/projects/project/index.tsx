@@ -1,10 +1,10 @@
-import { projectApi } from '@/entities/project/api/project-api';
-import { taskApi } from '@/entities/task/api/task-api';
+import { Link } from 'react-router';
 import type { Task } from '@/entities/task';
 import { Card, Flex, Typography } from 'antd';
-import { Link } from 'react-router';
+import { taskApi } from '@/entities/task/api/task-api';
 import TaskSectionsList from '@/shared/ui/TaskSectionsList';
-import type { Route } from './+types/projects.$id';
+import { projectApi } from '@/entities/project/api/project-api';
+import type { Route } from './+types/index';
 
 const { Title, Text } = Typography;
 
@@ -31,7 +31,7 @@ export async function loader({ params }: Route.LoaderArgs): Promise<LoaderData> 
 }
 
 export default function ProjectDetails({ loaderData }: Route.ComponentProps) {
-  const { project, tasks } = loaderData as LoaderData;
+  const { project, tasks } = loaderData as unknown as LoaderData;
 
   return (
     <Flex vertical gap="large" className="container">

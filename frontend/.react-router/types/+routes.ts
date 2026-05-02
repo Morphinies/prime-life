@@ -51,8 +51,8 @@ type RouteFiles = {
     id: "pages/projects/index";
     page: "/projects";
   };
-  "pages/projects.$id.tsx": {
-    id: "pages/projects.$id";
+  "pages/projects/project/index.tsx": {
+    id: "pages/projects/project/index";
     page: "/projects/:id";
   };
 };
@@ -63,5 +63,5 @@ type RouteModules = {
   "pages/dashboard/index": typeof import("./src/pages/dashboard/index.tsx");
   "pages/tasks/index": typeof import("./src/pages/tasks/index.tsx");
   "pages/projects/index": typeof import("./src/pages/projects/index.tsx");
-  "pages/projects.$id": typeof import("./src/pages/projects.$id.tsx");
+  "pages/projects/project/index": typeof import("./src/pages/projects/project/index.tsx");
 };
